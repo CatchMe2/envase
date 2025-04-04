@@ -1,1 +1,2 @@
-export const TEST = 'test';
+export { envvar } from './envvar.ts';
+export { parseEnv } from './parse-env.ts';
