@@ -29,13 +29,15 @@ Popular options include:
 - [Zod](https://zod.dev)
 - [Valibot](https://valibot.dev)
 - [ArkType](https://arktype.io)
-- [Effect Schema](https://effect.website/docs/schema)
 
 ## Key features
 
 ### Type-Safe Validation
 
 ```typescript
+import { parseEnv, envvar } from 'envschema';
+import { z } from 'zod';
+
 const config = parseEnv(process.env, {
   apiKey: envvar('API_KEY', z.string().min(32)),
   timeout: envvar('TIMEOUT', z.coerce.number().int()),
@@ -66,8 +68,19 @@ const config = parseEnv(process.env, {});
 
 ## API Reference
 
+### `envvar`
+
 `envvar(name: string, schema: StandardSchemaV1<T>)`
+
 Creates an environment variable validator.
 
+### `parseEnv`
+
 `parseEnv(env: Record<string, string | undefined>, schema: T)`
+
 Validates and returns typed configuration. Throws `ParseEnvError` if validation fails.
+
+## Contributing
+
+Contributions are welcome!
+If you’d like to improve this package, feel free to open an issue or submit a pull request. 🚀
