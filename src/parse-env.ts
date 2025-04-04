@@ -1,5 +1,5 @@
 import type { EnvvarEntry } from './envvar.ts';
-import { type EnvvarValidationError, ParseConfigError } from './error.ts';
+import { type EnvvarValidationError, ParseEnvError } from './error.ts';
 
 type EnvSchema = {
   [key: string]: EnvSchema | EnvvarEntry<unknown>;
@@ -69,7 +69,7 @@ export const parseEnv = <T extends EnvSchema>(
   const config = parseConfigObject(schema) as InferEnv<T>;
 
   if (envvarValidationErrors.length > 0) {
-    throw new ParseConfigError(envvarValidationErrors);
+    throw new ParseEnvError(envvarValidationErrors);
   }
 
   const nodeEnv = env.NODE_ENV;

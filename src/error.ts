@@ -4,7 +4,7 @@ export type EnvvarValidationError = {
   messages: string[];
 };
 
-export class ParseConfigError extends Error {
+export class ParseEnvError extends Error {
   constructor(envvarValidationErrors: EnvvarValidationError[]) {
     const parsedErrors = envvarValidationErrors
       .map(
