@@ -40,7 +40,7 @@ import { z } from 'zod';
 
 const config = parseEnv(process.env, {
   apiKey: envvar('API_KEY', z.string().min(32)),
-  timeout: envvar('TIMEOUT', z.coerce.number().int()),
+  timeout: envvar('TIMEOUT', z.coerce.number().int().default(5000)),
 });
 // config.apiKey -> string
 // config.timeout -> number
@@ -50,10 +50,16 @@ const config = parseEnv(process.env, {
 
 ```typescript
 const config = parseEnv(process.env, {
+  app: {
+    listen: {
+      port: envvar('PORT', z.coerce.number().int().min(0).max(65535)),
+    },
+  },
   db: {
     host: envvar('DB_HOST', z.string().min(1)),
   },
 });
+// config.app.listen.port -> number
 // config.db.host -> string
 ```
 
@@ -76,7 +82,7 @@ Creates an environment variable validator.
 
 ### `parseEnv`
 
-`parseEnv(env: Record<string, string | undefined>, schema: T)`
+`parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
 Validates and returns typed configuration. Throws `ParseEnvError` if validation fails.
 

@@ -28,7 +28,7 @@ type NodeEnvInfo = {
 
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
-  schema: T,
+  envSchema: T,
 ): InferEnv<T> & NodeEnvInfo => {
   const envvarValidationErrors: EnvvarValidationError[] = [];
 
@@ -66,7 +66,7 @@ export const parseEnv = <T extends EnvSchema>(
     );
   };
 
-  const config = parseConfigObject(schema) as InferEnv<T>;
+  const config = parseConfigObject(envSchema) as InferEnv<T>;
 
   if (envvarValidationErrors.length > 0) {
     throw new ParseEnvError(envvarValidationErrors);
