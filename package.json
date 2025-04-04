@@ -26,7 +26,7 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "lint": "biome check . && tsc",
     "lint:fix": "biome check --write .",
-    "test": "vitest --coverage",
+    "test": "vitest",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -36,6 +36,8 @@
     "@biomejs/biome": "^1.9.4",
     "@lokalise/tsconfig": "^1.1.0",
     "rimraf": "^6.0.1",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.1",
+    "zod": "^3.24.2"
   }
 }
