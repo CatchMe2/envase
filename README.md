@@ -9,7 +9,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 - 🔌 **Standard Schema compliant** - Works with any compatible validation library
 - 🌐 **Runtime agnostic** - Runs anywhere (Node, Bun, Deno, browsers)
 - 🏗️ **Structured configuration** - Supports nested config objects
-- 🚦 **Built-in environment detection** - `isProduction`, `isDevelopment`, `isTest` flags
+- 🚦 **Environment detection** - `isProduction`, `isTest`, `isDevelopment` flags
 - 📜 **Detailed error reporting** - See all validation failures at once
 - 🚀 **Lightweight** - Zero dependencies
 
@@ -18,6 +18,8 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 ```bash
 npm install envschema
 ```
+
+**Note**: This package is **ESM-only**. It does not support CommonJS `require(...)`.
 
 ## Validation Library Support
 
@@ -32,21 +34,7 @@ Popular options include:
 
 ## Key features
 
-### Type-Safe Validation
-
-```typescript
-import { parseEnv, envvar } from 'envschema';
-import { z } from 'zod';
-
-const config = parseEnv(process.env, {
-  apiKey: envvar('API_KEY', z.string().min(32)),
-  timeout: envvar('TIMEOUT', z.coerce.number().int().default(5000)),
-});
-// config.apiKey -> string
-// config.timeout -> number
-```
-
-### Nested Configuration
+### Type-Safe Validation of Nested Schema
 
 ```typescript
 const config = parseEnv(process.env, {
@@ -58,12 +46,14 @@ const config = parseEnv(process.env, {
   db: {
     host: envvar('DB_HOST', z.string().min(1)),
   },
+  apiKey: envvar('API_KEY', z.string().min(32)),
 });
 // config.app.listen.port -> number
 // config.db.host -> string
+// config.apiKey -> string
 ```
 
-### Built-in Environment Detection
+### Environment Detection
 
 ```typescript
 const config = parseEnv(process.env, {});
@@ -71,6 +61,8 @@ const config = parseEnv(process.env, {});
 // config.isDevelopment -> boolean
 // config.isTest -> boolean
 ```
+
+These flags are inferred from the `NODE_ENV` value (i.e. 'production', 'test', or 'development').
 
 ### Detailed error reporting
 
@@ -124,7 +116,7 @@ const envSchema = {
   },
 };
 
-type Config = InferEnv<typeof schema>;
+type Config = InferEnv<typeof envSchema>;
 // { apiKey: string; db: { host: string } }
 ```
 
@@ -134,22 +126,34 @@ type Config = InferEnv<typeof schema>;
 
 `envvar(name: string, schema: StandardSchemaV1<T>)`
 
-Creates an environment variable entry for validation.
+Wraps a variable name and its schema for validation.
+This helps pair the raw env name with the shape you expect it to conform to.
 
 ### `parseEnv`
 
 `parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
-Validates envvars against the schema and returns typed configuration with environment flags `isProduction`, `isTest`, `isDevelopment`.
+Validates envvars against the schema and returns a typed configuration object
+along with flags: `isProduction`, `isTest`, `isDevelopment`.
 
 ### `EnvSchemaError`
 
-Thrown when validation fails. Contains:
+Thrown when validation fails.
 
-`issues`: Array of validation issues with:
-- `name`: Environment variable name
-- `value`: Invalid value received
-- `messages`: Validation error messages
+Contains:
+- `message`: Human-readable error summary
+- `issues`: Array of validation issues with:
+  - `name`: Environment variable name
+  - `value`: Invalid value received
+  - `messages`: Validation error messages
+
+## Why EnvSchema?
+
+Unlike tools like `zod-env`, `envalid`, or `dotenv-safe`, `EnvSchema`:
+
+- ✅ Works with **any** schema lib that follows the [Standard Schema spec](https://standardschema.dev)
+- 🔄 Supports **deeply nested** configs
+- 🔍 Offers **rich error reporting** with detailed issue breakdowns
 
 ## Contributing
 
