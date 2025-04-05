@@ -72,6 +72,48 @@ const config = parseEnv(process.env, {});
 // config.isTest -> boolean
 ```
 
+### Detailed error reporting
+
+```typescript
+import { parseEnv, envvar, EnvSchemaError } from 'envschema';
+import { z } from 'zod';
+
+try {
+  parseEnv(process.env, {
+    apiKey: envvar('API_KEY', z.string().min(32)),
+    db: {
+      host: envvar('DB_HOST', z.string().min(1)),
+    },
+  });
+} catch (error: unknown) {
+  if (EnvSchemaError.isInstance(error)) {
+    error.message
+    // Environment variables validation has failed:
+    //   [API_KEY]:
+    //     String must contain at least 32 character(s)
+    //     (received: "short")
+    //
+    //   [DB_HOST]:
+    //     Required
+    //     (received: "undefined")
+
+    error.issues
+    //  [
+    //    {
+    //      "name": "API_KEY",
+    //      "value": "short",
+    //      "messages": ["String must contain at least 32 character(s)"]
+    //    },
+    //    {
+    //      "name": "DB_HOST",
+    //      "value": undefined,
+    //      "messages": ["Required"]
+    //    }
+    //  ]
+  }
+}
+```
+
 ## API Reference
 
 ### `envvar`
@@ -84,7 +126,25 @@ Creates an environment variable validator.
 
 `parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
-Validates and returns typed configuration. Throws `ParseEnvError` if validation fails.
+Validates and returns typed configuration. Throws `EnvSchemaError` if validation fails.
+
+### `EnvSchemaError`
+
+```typescript
+class ParseEnvError extends Error {
+  // Array of validation issues
+  readonly issues: Array<{
+    name: string; // Environment variable name
+    value: unknown; // Invalid value received
+    messages: string[]; // Validation error messages
+  }>;
+
+  // Type guard for error checking with type narrowing
+  static isInstance(error: unknown): error is ParseEnvError;
+}
+```
+
+Error that is getting thrown when env validation fails.
 
 ## Contributing
 

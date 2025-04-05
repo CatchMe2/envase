@@ -64,16 +64,16 @@ describe('core', () => {
           dbHost: envvar('MISSING', z.enum(['a', 'b'])),
         }),
       ).toThrowErrorMatchingInlineSnapshot(`
-      [ParseEnvError: Environment variables validation has failed:
-        [API_KEY]:
-          String must contain at least 20 character(s)
-          (received: "secret123")
+        [EnvSchemaError: Environment variables validation has failed:
+          [API_KEY]:
+            String must contain at least 20 character(s)
+            (received: "secret123")
 
-        [MISSING]:
-          Required
-          (received: "undefined")
-      ]
-    `);
+          [MISSING]:
+            Required
+            (received: "undefined")
+        ]
+      `);
     });
   });
 });

@@ -1,6 +1,10 @@
 import type { EnvvarValidationIssue } from '../types.ts';
 
-export class ParseEnvError extends Error {
+const symbol = Symbol.for('ENV_SCHEMA_ERROR');
+
+export class EnvSchemaError extends Error {
+  readonly issues: EnvvarValidationIssue[];
+
   constructor(envvarValidationIssues: EnvvarValidationIssue[]) {
     const parsedIssues = envvarValidationIssues
       .map(
@@ -11,6 +15,19 @@ export class ParseEnvError extends Error {
 
     super(`Environment variables validation has failed:\n${parsedIssues}\n`);
 
+    Object.defineProperty(this, symbol, {
+      value: true,
+    });
     this.name = this.constructor.name;
+    this.issues = envvarValidationIssues;
+  }
+
+  static isInstance(error: unknown): error is EnvSchemaError {
+    return (
+      error !== null &&
+      typeof error === 'object' &&
+      symbol in error &&
+      error[symbol] === true
+    );
   }
 }
