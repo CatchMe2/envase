@@ -1,36 +1,23 @@
-import type { EnvvarEntry } from './envvar.ts';
-import { type EnvvarValidationError, ParseEnvError } from './error.ts';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { ParseEnvError } from './errors/parse-env-error.ts';
+import type {
+  EnvSchema,
+  EnvvarEntry,
+  EnvvarValidationIssue,
+  InferEnv,
+  NodeEnvInfo,
+} from './types.ts';
 
-type EnvSchema = {
-  [key: string]: EnvSchema | EnvvarEntry<unknown>;
-};
-
-type DepthLevels = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-type InferEnv<
-  T extends EnvSchema,
-  DepthLimit extends number = 10,
-> = DepthLimit extends 0
-  ? never
-  : {
-      [K in keyof T]: T[K] extends EnvvarEntry<infer U>
-        ? U
-        : T[K] extends EnvSchema
-          ? InferEnv<T[K], DepthLevels[DepthLimit]>
-          : never;
-    };
-
-type NodeEnvInfo = {
-  isProduction: boolean;
-  isTest: boolean;
-  isDevelopment: boolean;
-};
+export const envvar = <T>(
+  name: string,
+  schema: StandardSchemaV1<T>,
+): EnvvarEntry<T> => [name, schema];
 
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
   envSchema: T,
 ): InferEnv<T> & NodeEnvInfo => {
-  const envvarValidationErrors: EnvvarValidationError[] = [];
+  const envvarValidationIssues: EnvvarValidationIssue[] = [];
 
   // biome-ignore lint/suspicious/noExplicitAny: Explicit 'any' is required due to nature of recursive processing
   const parseConfigObject = (schema: EnvSchema): any => {
@@ -49,7 +36,7 @@ export const parseEnv = <T extends EnvSchema>(
           }
 
           if (result.issues) {
-            envvarValidationErrors.push({
+            envvarValidationIssues.push({
               name: envvarName,
               value: envvarValue,
               messages: result.issues.map(({ message }) => message),
@@ -68,8 +55,8 @@ export const parseEnv = <T extends EnvSchema>(
 
   const config = parseConfigObject(envSchema) as InferEnv<T>;
 
-  if (envvarValidationErrors.length > 0) {
-    throw new ParseEnvError(envvarValidationErrors);
+  if (envvarValidationIssues.length > 0) {
+    throw new ParseEnvError(envvarValidationIssues);
   }
 
   const nodeEnv = env.NODE_ENV;
