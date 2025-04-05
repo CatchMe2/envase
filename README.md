@@ -114,37 +114,42 @@ try {
 }
 ```
 
+### Type Inference
+
+```typescript
+const envSchema = {
+  apiKey: envvar('API_KEY', z.string().min(32)),
+  db: {
+    host: envvar('DB_HOST', z.string().min(1)),
+  },
+};
+
+type Config = InferEnv<typeof schema>;
+// { apiKey: string; db: { host: string } }
+```
+
 ## API Reference
 
 ### `envvar`
 
 `envvar(name: string, schema: StandardSchemaV1<T>)`
 
-Creates an environment variable validator.
+Creates an environment variable entry for validation.
 
 ### `parseEnv`
 
 `parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
-Validates and returns typed configuration. Throws `EnvSchemaError` if validation fails.
+Validates envvars against the schema and returns typed configuration with environment flags `isProduction`, `isTest`, `isDevelopment`.
 
 ### `EnvSchemaError`
 
-```typescript
-class ParseEnvError extends Error {
-  // Array of validation issues
-  readonly issues: Array<{
-    name: string; // Environment variable name
-    value: unknown; // Invalid value received
-    messages: string[]; // Validation error messages
-  }>;
+Thrown when validation fails. Contains:
 
-  // Type guard for error checking with type narrowing
-  static isInstance(error: unknown): error is ParseEnvError;
-}
-```
-
-Error that is getting thrown when env validation fails.
+`issues`: Array of validation issues with:
+- `name`: Environment variable name
+- `value`: Invalid value received
+- `messages`: Validation error messages
 
 ## Contributing
 
