@@ -5,5 +5,10 @@ export default defineConfig({
     watch: false,
     include: ['./src/**/*.test.ts'],
     exclude: [],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/index.ts'],
+    },
   },
 });

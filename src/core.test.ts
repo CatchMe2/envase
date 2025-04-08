@@ -77,6 +77,19 @@ describe('core', () => {
         expect(config.withDefault).toBe('');
       });
 
+      it('throws for async validation', () => {
+        expect(() =>
+          parseEnv(mockEnv, {
+            apiKey: envvar(
+              'API_KEY',
+              z.string().refine(async () => Promise.resolve(true)),
+            ),
+          }),
+        ).toThrowError(
+          'Schema validation for envvar "API_KEY" must be synchronous',
+        );
+      });
+
       it('throws aggregated validation errors', () => {
         expect(() =>
           parseEnv(mockEnv, {
@@ -140,6 +153,22 @@ describe('core', () => {
         });
 
         expect(config.withDefault).toBe('');
+      });
+
+      it('throws for async validation', () => {
+        expect(() =>
+          parseEnv(mockEnv, {
+            apiKey: envvar(
+              'API_KEY',
+              v.pipeAsync(
+                v.string(),
+                v.checkAsync(async () => Promise.resolve(true)),
+              ),
+            ),
+          }),
+        ).toThrowError(
+          'Schema validation for envvar "API_KEY" must be synchronous',
+        );
       });
 
       it('throws aggregated validation errors with Valibot', () => {
