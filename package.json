@@ -2,6 +2,8 @@
   "name": "envschema",
   "version": "1.0.0",
   "type": "module",
+  "author": "Mateusz Tkacz",
+  "homepage": "https://github.com/CatchMe2/envschema",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CatchMe2/envschema.git"
