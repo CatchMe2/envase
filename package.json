@@ -37,6 +37,7 @@
     "@lokalise/tsconfig": "^1.1.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.0",
+    "valibot": "^1.0.0",
     "vitest": "^3.1.1",
     "zod": "^3.24.2"
   }

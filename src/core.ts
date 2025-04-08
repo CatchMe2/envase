@@ -8,9 +8,9 @@ import type {
   NodeEnvInfo,
 } from './types.ts';
 
-export const envvar = <T>(
+export const envvar = <T extends StandardSchemaV1>(
   name: string,
-  schema: StandardSchemaV1<T>,
+  schema: T,
 ): EnvvarEntry<T> => [name, schema];
 
 export const parseEnv = <T extends EnvSchema>(
