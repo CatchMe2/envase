@@ -21,6 +21,7 @@ describe('core', () => {
       API_KEY: 'secret123',
       DB_HOST: 'localhost',
       NODE_ENV: 'test',
+      EMPTY: '',
     };
 
     it('sets environment flags from NODE_ENV', () => {
@@ -66,6 +67,14 @@ describe('core', () => {
         });
 
         expect(config.withDefault).toBe('test');
+      });
+
+      it('allows for empty strings', () => {
+        const config = parseEnv(mockEnv, {
+          withDefault: envvar('EMPTY', z.string()),
+        });
+
+        expect(config.withDefault).toBe('');
       });
 
       it('throws aggregated validation errors', () => {
@@ -123,6 +132,14 @@ describe('core', () => {
         });
 
         expect(config.withDefault).toBe('test');
+      });
+
+      it('allows for empty strings', () => {
+        const config = parseEnv(mockEnv, {
+          withDefault: envvar('EMPTY', v.string()),
+        });
+
+        expect(config.withDefault).toBe('');
       });
 
       it('throws aggregated validation errors with Valibot', () => {
