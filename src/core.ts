@@ -29,7 +29,7 @@ export const parseEnv = <T extends EnvSchema>(
 
           const result = schema['~standard'].validate(envvarValue);
 
-          if (result instanceof Promise) {
+          if (result instanceof Promise || ('then' in result && typeof result.then === 'function')) {
             throw new Error(
               `Schema validation for envvar "${envvarName}" must be synchronous`,
             );
