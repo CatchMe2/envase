@@ -97,7 +97,7 @@ describe('core', () => {
             dbHost: envvar('MISSING', z.enum(['a', 'b'])),
           }),
         ).toThrowErrorMatchingInlineSnapshot(`
-        [EnvSchemaError: Environment variables validation has failed:
+        [EnvaseError: Environment variables validation has failed:
           [API_KEY]:
             String must contain at least 20 character(s)
             (received: "secret123")
@@ -178,7 +178,7 @@ describe('core', () => {
             dbHost: envvar('MISSING', v.picklist(['a', 'b'])),
           }),
         ).toThrowErrorMatchingInlineSnapshot(`
-        [EnvSchemaError: Environment variables validation has failed:
+        [EnvaseError: Environment variables validation has failed:
           [API_KEY]:
             Invalid length: Expected >=20 but received 9
             (received: "secret123")
