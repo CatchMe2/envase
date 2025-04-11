@@ -2,7 +2,7 @@ import type { EnvvarValidationIssue } from '../types.ts';
 
 const symbol = Symbol.for('ENV_SCHEMA_ERROR');
 
-export class EnvSchemaError extends Error {
+export class SafeEnvError extends Error {
   readonly issues: EnvvarValidationIssue[];
 
   constructor(envvarValidationIssues: EnvvarValidationIssue[]) {
@@ -22,7 +22,7 @@ export class EnvSchemaError extends Error {
     this.issues = envvarValidationIssues;
   }
 
-  static isInstance(error: unknown): error is EnvSchemaError {
+  static isInstance(error: unknown): error is SafeEnvError {
     return (
       error !== null &&
       typeof error === 'object' &&

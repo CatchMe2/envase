@@ -1,12 +1,12 @@
 {
-  "name": "envschema",
-  "version": "1.0.0",
+  "name": "safe-env",
+  "version": "0.1.0",
   "type": "module",
   "author": "Mateusz Tkacz",
-  "homepage": "https://github.com/CatchMe2/envschema",
+  "homepage": "https://github.com/CatchMe2/safe-env",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CatchMe2/envschema.git"
+    "url": "git+https://github.com/CatchMe2/safe-env.git"
   },
   "description": "Type-safe environment variable validation with Standard Schema compliance",
   "license": "MIT",

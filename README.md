@@ -1,4 +1,4 @@
-# EnvSchema
+# SafeEnv
 
 Type-safe environment variable validation with Standard Schema compliance.
 Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validation libraries.
@@ -16,7 +16,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 ## Installation
 
 ```bash
-npm install envschema
+npm install safe-env
 ```
 
 **Note**: This package is **ESM-only**. It does not support CommonJS `require(...)`.
@@ -24,7 +24,7 @@ npm install envschema
 ## Validation Library Support
 
 Built on the [Standard Schema](https://standardschema.dev) specification,
-EnvSchema works seamlessly with any schema library that implements the spec.
+SafeEnv works seamlessly with any schema library that implements the spec.
 See the [full list of compatible libraries](https://standardschema.dev#what-schema-libraries-implement-the-spec).
 
 Popular options include:
@@ -67,7 +67,7 @@ These flags are inferred from the `NODE_ENV` value (i.e. 'production', 'test', o
 ### Detailed error reporting
 
 ```typescript
-import { parseEnv, envvar, EnvSchemaError } from 'envschema';
+import { parseEnv, envvar, SafeEnvError } from 'safe-env';
 import { z } from 'zod';
 
 try {
@@ -78,7 +78,7 @@ try {
     },
   });
 } catch (error: unknown) {
-  if (EnvSchemaError.isInstance(error)) {
+  if (SafeEnvError.isInstance(error)) {
     error.message
     // Environment variables validation has failed:
     //   [API_KEY]:
@@ -136,7 +136,7 @@ This helps pair the raw env name with the shape you expect it to conform to.
 Validates envvars against the schema and returns a typed configuration object
 along with flags: `isProduction`, `isTest`, `isDevelopment`.
 
-### `EnvSchemaError`
+### `SafeEnvError`
 
 Thrown when validation fails.
 
@@ -147,9 +147,7 @@ Contains:
   - `value`: Invalid value received
   - `messages`: Validation error messages
 
-## Why EnvSchema?
-
-Unlike tools like `zod-env`, `envalid`, or `dotenv-safe`, `EnvSchema`:
+## Why SafeEnv?
 
 - ✅ Works with **any** schema lib that follows the [Standard Schema spec](https://standardschema.dev)
 - 🔄 Supports **deeply nested** configs
