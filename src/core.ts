@@ -1,5 +1,5 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import { SafeEnvError } from './errors/safe-env-error.ts';
+import { EnvaseError } from './errors/envase-error.ts';
 import type {
   EnvSchema,
   EnvvarEntry,
@@ -59,7 +59,7 @@ export const parseEnv = <T extends EnvSchema>(
   const config = parseConfigObject(envSchema) as InferEnv<T>;
 
   if (envvarValidationIssues.length > 0) {
-    throw new SafeEnvError(envvarValidationIssues);
+    throw new EnvaseError(envvarValidationIssues);
   }
 
   const nodeEnv = env.NODE_ENV;

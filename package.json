@@ -1,12 +1,12 @@
 {
-  "name": "safe-env",
+  "name": "envase",
   "version": "0.1.0",
   "type": "module",
   "author": "Mateusz Tkacz",
-  "homepage": "https://github.com/CatchMe2/safe-env",
+  "homepage": "https://github.com/CatchMe2/envase",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CatchMe2/safe-env.git"
+    "url": "git+https://github.com/CatchMe2/envase.git"
   },
   "description": "Type-safe environment variable validation with Standard Schema compliance",
   "license": "MIT",
@@ -19,6 +19,9 @@
     "valibot",
     "arktype"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "files": ["dist"],
   "exports": {
     ".": "./dist/index.js",

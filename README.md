@@ -1,7 +1,9 @@
-# SafeEnv
+# Envase
 
 Type-safe environment variable validation with Standard Schema compliance.
 Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validation libraries.
+
+> "Envase" is Spanish for "container" - reflecting how this library encapsulates environment variables in a safe, structured, and validated way.
 
 ## Highlights
 
@@ -16,7 +18,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 ## Installation
 
 ```bash
-npm install safe-env
+npm install envase
 ```
 
 **Note**: This package is **ESM-only**. It does not support CommonJS `require(...)`.
@@ -24,7 +26,7 @@ npm install safe-env
 ## Validation Library Support
 
 Built on the [Standard Schema](https://standardschema.dev) specification,
-SafeEnv works seamlessly with any schema library that implements the spec.
+Envase works seamlessly with any schema library that implements the spec.
 See the [full list of compatible libraries](https://standardschema.dev#what-schema-libraries-implement-the-spec).
 
 Popular options include:
@@ -37,6 +39,9 @@ Popular options include:
 ### Type-Safe Validation of Nested Schema
 
 ```typescript
+import { parseEnv, envvar, EnvaseError } from 'envase';
+import { z } from 'zod';
+
 const config = parseEnv(process.env, {
   app: {
     listen: {
@@ -67,9 +72,6 @@ These flags are inferred from the `NODE_ENV` value (i.e. 'production', 'test', o
 ### Detailed error reporting
 
 ```typescript
-import { parseEnv, envvar, SafeEnvError } from 'safe-env';
-import { z } from 'zod';
-
 try {
   parseEnv(process.env, {
     apiKey: envvar('API_KEY', z.string().min(32)),
@@ -78,7 +80,7 @@ try {
     },
   });
 } catch (error: unknown) {
-  if (SafeEnvError.isInstance(error)) {
+  if (EnvaseError.isInstance(error)) {
     error.message
     // Environment variables validation has failed:
     //   [API_KEY]:
@@ -136,7 +138,7 @@ This helps pair the raw env name with the shape you expect it to conform to.
 Validates envvars against the schema and returns a typed configuration object
 along with flags: `isProduction`, `isTest`, `isDevelopment`.
 
-### `SafeEnvError`
+### `EnvaseError`
 
 Thrown when validation fails.
 
@@ -147,7 +149,7 @@ Contains:
   - `value`: Invalid value received
   - `messages`: Validation error messages
 
-## Why SafeEnv?
+## Why Envase?
 
 - ✅ Works with **any** schema lib that follows the [Standard Schema spec](https://standardschema.dev)
 - 🔄 Supports **deeply nested** configs
