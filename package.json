@@ -8,6 +8,9 @@
     "type": "git",
     "url": "git+https://github.com/CatchMe2/envase.git"
   },
+  "bugs": {
+    "url": "https://github.com/CatchMe2/envase/issues"
+  },
   "description": "Type-safe environment variable validation with Standard Schema compliance",
   "license": "MIT",
   "keywords": [
