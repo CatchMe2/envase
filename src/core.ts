@@ -4,8 +4,7 @@ import type {
   EnvSchema,
   EnvvarEntry,
   EnvvarValidationIssue,
-  InferEnv,
-  NodeEnvInfo,
+  ParseEnvOutput,
 } from './types.ts';
 
 export const envvar = <T extends StandardSchemaV1>(
@@ -16,7 +15,7 @@ export const envvar = <T extends StandardSchemaV1>(
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
   envSchema: T,
-): InferEnv<T> & NodeEnvInfo => {
+): ParseEnvOutput<T> => {
   const envvarValidationIssues: EnvvarValidationIssue[] = [];
 
   // biome-ignore lint/suspicious/noExplicitAny: Explicit 'any' is required due to nature of recursive processing
@@ -56,7 +55,7 @@ export const parseEnv = <T extends EnvSchema>(
     );
   };
 
-  const config = parseConfigObject(envSchema) as InferEnv<T>;
+  const config = parseConfigObject(envSchema);
 
   if (envvarValidationIssues.length > 0) {
     throw new EnvaseError(envvarValidationIssues);
