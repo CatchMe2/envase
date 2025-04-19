@@ -1,6 +1,6 @@
 {
   "name": "envase",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "author": "Mateusz Tkacz",
   "homepage": "https://github.com/CatchMe2/envase",
@@ -25,7 +25,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
