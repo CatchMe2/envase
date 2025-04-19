@@ -1,0 +1,53 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: "Select bump type or custom"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - custom
+
+      custom_version:
+        description: "Custom version (e.g., 1.2.3-canary.1). Used only if bump_type is 'custom'"
+        required: false
+        type: string
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bump version
+        id: version_step
+        run: |
+          if [ "${{ github.event.inputs.bump_type }}" = "custom" ]; then
+            npm version "${{ github.event.inputs.custom_version }}" --no-git-tag-version
+          else
+            npm version "${{ github.event.inputs.bump_type }}" --no-git-tag-version
+          fi
+
+      - name: Commit and tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -am "chore: version bump to v$VERSION"
+          git tag v$VERSION
+          git push origin HEAD v$VERSION
+          echo "### ✅ Completed version bump: \`v$VERSION\`" >> $GITHUB_STEP_SUMMARY
