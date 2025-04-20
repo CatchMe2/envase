@@ -1,5 +1,5 @@
-import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { EnvaseError } from './errors/envase-error.ts';
+import type { StandardSchemaV1 } from './standard-schema.ts';
 import type {
   EnvSchema,
   EnvvarEntry,
