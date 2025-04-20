@@ -1,5 +1,5 @@
-import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { SimplifyDeep } from 'type-fest';
+import type { StandardSchemaV1 } from './standard-schema.ts';
 
 export type EnvvarEntry<T extends StandardSchemaV1> = [string, T];
 

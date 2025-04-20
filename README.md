@@ -13,7 +13,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 - 🏗️ **Structured configuration** - Supports nested config objects
 - 🚦 **Environment detection** - `isProduction`, `isTest`, `isDevelopment` flags
 - 📜 **Detailed error reporting** - See all validation failures at once
-- 🚀 **Lightweight** - Zero dependencies
+- 🚀 **Lightweight** - Single dependency (type-fest), zero runtime overhead
 
 ## Installation
 
