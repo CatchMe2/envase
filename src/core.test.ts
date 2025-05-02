@@ -1,9 +1,41 @@
 import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { envvar, parseEnv } from './core.ts';
+import {detectNodeEnv, envvar, parseEnv} from './core.ts';
 
 describe('core', () => {
+
+  describe('detectNodeEnv', () => {
+    it('returns true for isProduction flag', () => {
+      const config = detectNodeEnv({ NODE_ENV: 'production' });
+
+      expect(config.isProduction).toBe(true);
+      expect(config.isTest).toBe(false);
+      expect(config.isDevelopment).toBe(false);
+    });
+    it('returns true for isTest flag', () => {
+      const config = detectNodeEnv({ NODE_ENV: 'test' });
+
+      expect(config.isProduction).toBe(false);
+      expect(config.isTest).toBe(true);
+      expect(config.isDevelopment).toBe(false);
+    });
+    it('returns true for isDevelopment flag', () => {
+      const config = detectNodeEnv({ NODE_ENV: 'development' });
+
+      expect(config.isProduction).toBe(false);
+      expect(config.isTest).toBe(false);
+      expect(config.isDevelopment).toBe(true);
+    });
+    it('returns all falsy flags if NODE_ENV is missing', () => {
+      const config = detectNodeEnv({});
+
+      expect(config.isProduction).toBe(false);
+      expect(config.isTest).toBe(false);
+      expect(config.isDevelopment).toBe(false);
+    });
+  })
+
   describe('envvar', () => {
     it('creates a tuple with environment variable name and Standard Schema validator', () => {
       const envvarName = 'API_KEY';
@@ -23,14 +55,6 @@ describe('core', () => {
       NODE_ENV: 'test',
       EMPTY: '',
     };
-
-    it('sets environment flags from NODE_ENV', () => {
-      const config = parseEnv(mockEnv, {});
-
-      expect(config.isTest).toBe(true);
-      expect(config.isProduction).toBe(false);
-      expect(config.isDevelopment).toBe(false);
-    });
 
     describe('using zod', () => {
       it('parses flat config with Zod validators', () => {

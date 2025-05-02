@@ -39,7 +39,7 @@ Popular options include:
 ### Type-Safe Validation of Nested Schema
 
 ```typescript
-import { parseEnv, envvar, EnvaseError } from 'envase';
+import { parseEnv, envvar } from 'envase';
 import { z } from 'zod';
 
 const config = parseEnv(process.env, {
@@ -49,22 +49,24 @@ const config = parseEnv(process.env, {
     },
   },
   db: {
-    host: envvar('DB_HOST', z.string().min(1)),
+    host: envvar('DB_HOST', z.string().min(1).default('localhost')),
   },
-  apiKey: envvar('API_KEY', z.string().min(32)),
+  apiKey: envvar('API_KEY', z.string().min(32).optional()),
 });
 // config.app.listen.port -> number
 // config.db.host -> string
-// config.apiKey -> string
+// config.apiKey -> string | undefined
 ```
 
 ### Environment Detection
 
 ```typescript
-const config = parseEnv(process.env, {});
-// config.isProduction -> boolean
-// config.isDevelopment -> boolean
-// config.isTest -> boolean
+import { detectNodeEnv } from 'envase';
+
+const nodeEnv = detectNodeEnv(process.env);
+// nodeEnv.isProduction -> boolean
+// nodeEnv.isTest -> boolean
+// nodeEnv.isDevelopment -> boolean
 ```
 
 These flags are inferred from the `NODE_ENV` value (i.e. 'production', 'test', or 'development').
@@ -72,6 +74,9 @@ These flags are inferred from the `NODE_ENV` value (i.e. 'production', 'test', o
 ### Detailed error reporting
 
 ```typescript
+import { parseEnv, envvar, EnvaseError } from 'envase';
+import { z } from 'zod';
+
 try {
   parseEnv(process.env, {
     apiKey: envvar('API_KEY', z.string().min(32)),
@@ -111,6 +116,9 @@ try {
 ### Type Inference
 
 ```typescript
+import { envvar, type InferEnv } from 'envase';
+import { z } from 'zod';
+
 const envSchema = {
   apiKey: envvar('API_KEY', z.string().min(32)),
   db: {
@@ -135,8 +143,17 @@ This helps pair the raw env name with the shape you expect it to conform to.
 
 `parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
-Validates envvars against the schema and returns a typed configuration object
-along with flags: `isProduction`, `isTest`, `isDevelopment`.
+Validates envvars against the schema and returns a typed configuration object.
+
+### `detectNodeEnv`
+
+`detectNodeEnv(env: Record<string, string | undefined>)`
+
+Standalone utility that reads NODE_ENV and returns an object with the following boolean flags:
+
+- isProduction: true if NODE_ENV === 'production'
+- isTest: true if NODE_ENV === 'test'
+- isDevelopment: true if NODE_ENV === 'development'
 
 ### `EnvaseError`
 

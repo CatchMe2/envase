@@ -4,8 +4,19 @@ import type {
   EnvSchema,
   EnvvarEntry,
   EnvvarValidationIssue,
-  ParseEnvOutput,
+  NodeEnvInfo,
+  InferEnv,
 } from './types.ts';
+
+export const detectNodeEnv = (env: Record<string, string | undefined>): NodeEnvInfo => {
+  const nodeEnv = env.NODE_ENV;
+
+  return {
+    isProduction: nodeEnv === 'production',
+    isTest: nodeEnv === 'test',
+    isDevelopment: nodeEnv === 'development',
+  };
+}
 
 export const envvar = <T extends StandardSchemaV1>(
   name: string,
@@ -15,7 +26,7 @@ export const envvar = <T extends StandardSchemaV1>(
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
   envSchema: T,
-): ParseEnvOutput<T> => {
+): InferEnv<T> => {
   const envvarValidationIssues: EnvvarValidationIssue[] = [];
 
   // biome-ignore lint/suspicious/noExplicitAny: Explicit 'any' is required due to nature of recursive processing
@@ -61,12 +72,5 @@ export const parseEnv = <T extends EnvSchema>(
     throw new EnvaseError(envvarValidationIssues);
   }
 
-  const nodeEnv = env.NODE_ENV;
-
-  return {
-    ...config,
-    isProduction: nodeEnv === 'production',
-    isTest: nodeEnv === 'test',
-    isDevelopment: nodeEnv === 'development',
-  };
+  return config;
 };
