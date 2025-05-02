@@ -4,11 +4,13 @@ import type {
   EnvSchema,
   EnvvarEntry,
   EnvvarValidationIssue,
-  NodeEnvInfo,
   InferEnv,
+  NodeEnvInfo,
 } from './types.ts';
 
-export const detectNodeEnv = (env: Record<string, string | undefined>): NodeEnvInfo => {
+export const detectNodeEnv = (
+  env: Record<string, string | undefined>,
+): NodeEnvInfo => {
   const nodeEnv = env.NODE_ENV;
 
   return {
@@ -16,7 +18,7 @@ export const detectNodeEnv = (env: Record<string, string | undefined>): NodeEnvI
     isTest: nodeEnv === 'test',
     isDevelopment: nodeEnv === 'development',
   };
-}
+};
 
 export const envvar = <T extends StandardSchemaV1>(
   name: string,
