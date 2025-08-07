@@ -1,22 +1,14 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "files": {
-    "ignore": ["dist", "coverage", "package.json", "package-lock.json"]
-  },
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "formatter": {
-    "enabled": true,
     "useEditorconfig": true
   },
-  "organizeImports": {
-    "enabled": true
-  },
   "linter": {
-    "enabled": true,
     "rules": {
       "recommended": true
     }
