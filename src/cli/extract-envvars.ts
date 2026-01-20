@@ -1,5 +1,5 @@
 import type { EnvSchema } from '../types.ts';
-import type {StandardJSONSchemaV1} from "../standard-schema.ts";
+import type {StandardJSONSchemaV1, StandardSchemaV1} from "../standard-schema.ts";
 
 export interface ExtractedEnvvar {
   /** Environment variable name */
@@ -7,7 +7,7 @@ export interface ExtractedEnvvar {
   /** Nested path (e.g., ['app', 'listen']) */
   path: string[];
   /** Standard Schema instance */
-  schema: StandardJSONSchemaV1;
+  schema: StandardSchemaV1 & StandardJSONSchemaV1;
 }
 
 const isStandardJsonSchema = (value: unknown): value is StandardJSONSchemaV1 => {

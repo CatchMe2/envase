@@ -18,37 +18,24 @@ main
   .option('-o, --output <file>', 'Output markdown file path', {
     default: './env-docs.md',
   })
-  .option(
-    '-f, --format <format>',
-    'JSON Schema format (draft-07, draft-2020-12, openapi-3.0)',
-    {
-      default: 'draft-2020-12',
-    },
-  )
-  .option('--no-groups', 'Disable grouping by nested structure')
   .example('envase-docs ./config.js -o docs/environment.md')
-  .example('envase-docs ./dist/config.js --format draft-07')
   .action(
     async (
       schemaPath: string,
       options: {
         output: string;
-        format: string;
-        groups: boolean;
       },
     ) => {
       try {
         console.log('📖 Loading schema from:', schemaPath);
         const schema = await loadSchema(schemaPath);
-
         const extractedEnvvars = extractEnvvars(schema);
 
         console.log('📝 Generating markdown documentation...');
         const markdown = generateMarkdown(extractedEnvvars);
 
         const outputPath = resolve(process.cwd(), options.output);
-        // await writeFile(outputPath, markdown, 'utf-8');
-console.log(markdown)
+        await writeFile(outputPath, markdown, 'utf-8');
         console.log(`✓ Documentation generated: ${outputPath}`);
       } catch (error) {
         console.error(
@@ -61,6 +48,4 @@ console.log(markdown)
   );
 
 main.help();
-// main.version(version);
-
 main.parse();
