@@ -130,6 +130,71 @@ type Config = InferEnv<typeof envSchema>;
 // { apiKey: string; db: { host: string } }
 ```
 
+## CLI Documentation Generator
+
+Generate markdown documentation from your environment variable schemas using the `envase-docs` CLI tool.
+
+### Installation
+
+```bash
+npm install envase
+```
+
+### Usage
+
+Create your schema file:
+
+```typescript
+// config.ts
+import { envvar } from 'envase';
+import { z } from 'zod';
+
+export const schema = {
+  app: {
+    listen: {
+      port: envvar('PORT', z.coerce.number().int().min(1024).max(65535)
+        .describe('Application listening port')),
+      host: envvar('HOST', z.string().default('0.0.0.0')
+        .describe('Bind host address')),
+    },
+  },
+  database: {
+    url: envvar('DATABASE_URL', z.string().url()
+      .describe('PostgreSQL connection URL')),
+  },
+};
+```
+
+Build your TypeScript file and generate documentation:
+
+```bash
+tsc config.ts
+npx envase-docs ./config.js --output ./docs/env.md
+```
+
+Or use `tsx` to skip the build step:
+
+```bash
+npx tsx node_modules/.bin/envase-docs ./config.ts --output ./docs/env.md
+```
+
+### CLI Options
+
+- `<schema>` - Path to schema file (required). Must be a JavaScript file or compiled TypeScript.
+- `-o, --output <file>` - Output markdown file path (default: `./env-docs.md`)
+- `-f, --format <format>` - JSON Schema format: `draft-07`, `draft-2020-12`, or `openapi-3.0` (default: `draft-2020-12`)
+- `--no-groups` - Disable grouping by nested structure in the output
+
+### Example Output
+
+The CLI generates readable markdown documentation with:
+- Type information for each environment variable
+- Required/optional status
+- Default values
+- Descriptions (from `.describe()` calls)
+- Constraints (min, max, pattern, format, etc.)
+- Grouped by nested configuration structure
+
 ## API Reference
 
 ### `envvar`
