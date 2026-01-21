@@ -41,7 +41,8 @@ export const extractEnvvars = (
       const [envName, standardSchema] = value;
 
       if (!isStandardJsonSchema(standardSchema)) {
-        throw new Error('Passed schema is not json schema');
+        const combinedPath = [...path, key].join('.')
+        throw new Error(`Path "${combinedPath}" does not contain a valid standard json schema`);
       }
 
       extractedEnvvars.push({

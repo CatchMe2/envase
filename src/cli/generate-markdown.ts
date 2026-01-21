@@ -6,7 +6,7 @@ import type { ExtractedEnvvar } from './extract-envvars.ts';
 export const generateMarkdown = (
   extractedEnvvars: ExtractedEnvvar[],
 ): string => {
-  const lines: string[] = ['# List of environment variables', ''];
+  const lines: string[] = ['# Environment variables', ''];
 
   const envvarsByPath = new Map<string, ExtractedEnvvar[]>();
 
