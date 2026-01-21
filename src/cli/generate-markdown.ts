@@ -40,7 +40,7 @@ export const generateMarkdown = (
       const validationResult = envvar.schema['~standard'].validate(undefined);
       const isOptional = 'value' in validationResult;
 
-      const requiredPrefix = isOptional ? '' : '**(REQUIRED)**';
+      const requiredPrefix = isOptional ? '' : '**(REQUIRED)** ';
       let line = `- ${requiredPrefix}\`${envvar.envName}\` *(${type})*`;
 
       if (schema.description) {

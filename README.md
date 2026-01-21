@@ -132,24 +132,18 @@ type Config = InferEnv<typeof envSchema>;
 
 ## CLI Documentation Generator
 
-Generate markdown documentation from your environment variable schemas using the `envase-docs` CLI tool.
+Automatically generate markdown documentation from your environment variable schemas.
 
-### Installation
+### Quick Start
 
-```bash
-npm install envase
-```
-
-### Usage
-
-Create your schema file:
+**1. Create your schema file with a default export:**
 
 ```typescript
 // config.ts
 import { envvar } from 'envase';
 import { z } from 'zod';
 
-export const schema = {
+export default {
   app: {
     listen: {
       port: envvar('PORT', z.coerce.number().int().min(1024).max(65535)
@@ -165,35 +159,65 @@ export const schema = {
 };
 ```
 
-Build your TypeScript file and generate documentation:
+**2. Generate documentation:**
 
 ```bash
+# Using TypeScript directly with Node.js type stripping feature
+envase generate ./config.ts -o ./docs/env.md
+
+# Or use tsx (recommended for older Node versions)
+tsx node_modules/.bin/envase generate ./config.ts -o ./docs/env.md
+
+# Or compile first, then generate
 tsc config.ts
-npx envase-docs ./config.js --output ./docs/env.md
+envase generate ./config.js -o ./docs/env.md
 ```
 
-Or use `tsx` to skip the build step:
+### Command Reference
 
-```bash
-npx tsx node_modules/.bin/envase-docs ./config.ts --output ./docs/env.md
-```
+#### `envase generate <schema>`
 
-### CLI Options
+Generates markdown documentation from an environment schema.
 
-- `<schema>` - Path to schema file (required). Must be a JavaScript file or compiled TypeScript.
-- `-o, --output <file>` - Output markdown file path (default: `./env-docs.md`)
-- `-f, --format <format>` - JSON Schema format: `draft-07`, `draft-2020-12`, or `openapi-3.0` (default: `draft-2020-12`)
-- `--no-groups` - Disable grouping by nested structure in the output
+**Arguments:**
+- `<schemaPath>` - Path to a file containing default export of env schema.
+
+**Options:**
+- `-o, --output <file>` - Output file path (default: `./env-docs.md`)
 
 ### Example Output
 
 The CLI generates readable markdown documentation with:
 - Type information for each environment variable
-- Required/optional status
+- Required/optional status with **(REQUIRED)** marker
 - Default values
 - Descriptions (from `.describe()` calls)
-- Constraints (min, max, pattern, format, etc.)
+- Constraints (min, max, minLength, maxLength, pattern, format, etc.)
+- Enum values (for enum types)
 - Grouped by nested configuration structure
+
+**Sample generated markdown:**
+
+```markdown
+# Environment variables
+
+## App Listen
+
+- **(REQUIRED)** `PORT` *(number)*
+  Application listening port
+  Minimum: `1024`
+  Maximum: `65535`
+
+- `HOST` *(string)*
+  Bind host address
+  Default: `0.0.0.0`
+
+## Database
+
+- **(REQUIRED)** `DATABASE_URL` *(string)*
+  PostgreSQL connection URL
+  Format: `uri`
+```
 
 ## API Reference
 

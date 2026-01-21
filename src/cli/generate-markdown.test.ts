@@ -116,7 +116,7 @@ describe('generateMarkdown', () => {
       {
         envName: 'EMAIL',
         path: [],
-        schema: z.string().regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/),
+        schema: z.string().regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/),
       },
     ];
 

@@ -56,7 +56,11 @@ describe('extractEnvvars', () => {
     const result = extractEnvvars(schema);
 
     expect(result).toEqual([
-      { envName: 'DB_HOST', path: ['app', 'database', 'connection'], schema: hostSchema },
+      {
+        envName: 'DB_HOST',
+        path: ['app', 'database', 'connection'],
+        schema: hostSchema,
+      },
     ]);
   });
 
@@ -84,7 +88,7 @@ describe('extractEnvvars', () => {
       port: ['PORT', 'not-a-schema'],
     };
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => extractEnvvars(invalidSchema)).toThrow(
       'Path "port" does not contain a valid standard json schema',
     );
