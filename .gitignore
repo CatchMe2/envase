@@ -1,9 +1,10 @@
 .DS_Store
 
-.vscode
-.idea
+.vscode/
+.idea/
+.claude/
 
-node_modules
+node_modules/
 
-dist
-coverage
+dist/
+coverage/

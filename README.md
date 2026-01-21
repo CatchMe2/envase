@@ -130,6 +130,95 @@ type Config = InferEnv<typeof envSchema>;
 // { apiKey: string; db: { host: string } }
 ```
 
+## CLI Documentation Generator
+
+Automatically generate markdown documentation from your environment variable schemas.
+
+### Quick Start
+
+**1. Create your schema file with a default export:**
+
+```typescript
+// config.ts
+import { envvar } from 'envase';
+import { z } from 'zod';
+
+export default {
+  app: {
+    listen: {
+      port: envvar('PORT', z.coerce.number().int().min(1024).max(65535)
+        .describe('Application listening port')),
+      host: envvar('HOST', z.string().default('0.0.0.0')
+        .describe('Bind host address')),
+    },
+  },
+  database: {
+    url: envvar('DATABASE_URL', z.string().url()
+      .describe('PostgreSQL connection URL')),
+  },
+};
+```
+
+**2. Generate documentation:**
+
+```bash
+# Using TypeScript directly with Node.js type stripping feature
+envase generate ./config.ts -o ./docs/env.md
+
+# Or use tsx (recommended for older Node versions)
+tsx node_modules/.bin/envase generate ./config.ts -o ./docs/env.md
+
+# Or compile first, then generate
+tsc config.ts
+envase generate ./config.js -o ./docs/env.md
+```
+
+### Command Reference
+
+#### `envase generate <schema>`
+
+Generates markdown documentation from an environment schema.
+
+**Arguments:**
+- `<schemaPath>` - Path to a file containing default export of env schema.
+
+**Options:**
+- `-o, --output <file>` - Output file path (default: `./env-docs.md`)
+
+### Example Output
+
+The CLI generates readable markdown documentation with:
+- Type information for each environment variable
+- Required/optional status with **(REQUIRED)** marker
+- Default values
+- Descriptions (from `.describe()` calls)
+- Constraints (min, max, minLength, maxLength, pattern, format, etc.)
+- Enum values (for enum types)
+- Grouped by nested configuration structure
+
+**Sample generated markdown:**
+
+```markdown
+# Environment variables
+
+## App Listen
+
+- **(REQUIRED)** `PORT` *(number)*
+  Application listening port
+  Minimum: `1024`
+  Maximum: `65535`
+
+- `HOST` *(string)*
+  Bind host address
+  Default: `0.0.0.0`
+
+## Database
+
+- **(REQUIRED)** `DATABASE_URL` *(string)*
+  PostgreSQL connection URL
+  Format: `uri`
+```
+
 ## API Reference
 
 ### `envvar`
