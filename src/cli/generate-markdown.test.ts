@@ -27,12 +27,21 @@ describe('generateMarkdown', () => {
       {
         envName: 'PORT',
         path: ['app', 'server'],
-        schema: z.number().min(1024).max(65535).default(3000).describe('Server port'),
+        schema: z
+          .number()
+          .min(1024)
+          .max(65535)
+          .default(3000)
+          .describe('Server port'),
       },
       {
         envName: 'HOST',
         path: ['app', 'server'],
-        schema: z.string().default('0.0.0.0').optional().describe('Server host'),
+        schema: z
+          .string()
+          .default('0.0.0.0')
+          .optional()
+          .describe('Server host'),
       },
       {
         envName: 'DB_HOST',
@@ -43,41 +52,6 @@ describe('generateMarkdown', () => {
 
     const markdown = generateMarkdown(extractedEnvvars);
 
-    expect(markdown).toMatchInlineSnapshot(`
-      "# Environment variables
-
-      - \`API_KEY\` (required)
-        Type: \`string\`
-        Description: Your API key for authentication
-        Min length: \`32\`
-
-      ## App Server
-
-      - \`PORT\` (optional)
-        Type: \`number\`
-        Description: Server port
-        Min value: \`1024\`
-        Max value: \`65535\`
-        Default: \`3000\`
-
-      - \`HOST\` (optional)
-        Type: \`string\`
-        Description: Server host
-        Default: \`0.0.0.0\`
-
-      ## App
-
-      - \`LOG_LEVEL\` (optional)
-        Type: \`string\`
-        Supported values: \`debug\` | \`info\` | \`warn\` | \`error\`
-        Default: \`info\`
-
-      ## Database
-
-      - \`DB_HOST\` (required)
-        Type: \`string\`
-        Description: Database host address
-      "
-    `);
+    expect(markdown).toMatchSnapshot();
   });
 });

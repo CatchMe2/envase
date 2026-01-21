@@ -33,7 +33,9 @@ export const generateMarkdown = (
         target: 'openapi-3.0',
       });
 
-      const mappedType = Array.isArray(schema.anyOf) ? schema.anyOf.map((schema) => schema.type) : schema.type;
+      const mappedType = Array.isArray(schema.anyOf)
+        ? schema.anyOf.map((schema) => schema.type)
+        : schema.type;
 
       const type = Array.isArray(mappedType)
         ? mappedType.map((type) => `\`${type}\``).join(' | ')
