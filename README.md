@@ -30,9 +30,20 @@ Envase works seamlessly with any schema library that implements the spec.
 See the [full list of compatible libraries](https://standardschema.dev#what-schema-libraries-implement-the-spec).
 
 Popular options include:
-- [Zod](https://zod.dev)
-- [Valibot](https://valibot.dev)
-- [ArkType](https://arktype.io)
+- [Zod](https://zod.dev) - v3.24+ (Standard Schema), v4.2+ (JSON Schema)
+- [Valibot](https://valibot.dev) - v1.0+ (Standard Schema), v1.2+ (JSON Schema)
+- [ArkType](https://arktype.io) - v2.0+ (Standard Schema), v2.1.28+ (JSON Schema)
+
+### Documentation Generation Support
+
+The CLI documentation generator requires libraries that implement **Standard JSON Schema** in addition to Standard Schema. This feature allows schemas to be introspected and converted to JSON Schema for documentation purposes.
+
+**Supported libraries:**
+- ✅ **Zod** (v4.2+) - Direct support via `~standard.jsonSchema`
+- ✅ **ArkType** (v2.1.28+) - Direct support via `~standard.jsonSchema`
+- ✅ **Valibot** (v1.2+) - Via `@valibot/to-json-schema` package (v1.5+)
+
+All three major validation libraries support documentation generation. For Valibot, you'll need to install the additional `@valibot/to-json-schema` package.
 
 ## Key features
 
