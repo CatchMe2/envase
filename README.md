@@ -201,22 +201,25 @@ The CLI generates readable markdown documentation with:
 ```markdown
 # Environment variables
 
-## App Listen
+## App
 
-- **(REQUIRED)** `PORT` *(number)*
-  Application listening port
-  Minimum: `1024`
-  Maximum: `65535`
+- \`PORT\` (optional)
+  Type: \`number\`
+  Description: Server port
+  Min value: \`1024\`
+  Max value: \`65535\`
+  Default: \`3000\`
 
-- `HOST` *(string)*
-  Bind host address
-  Default: `0.0.0.0`
+- \`HOST\` (optional)
+  Type: \`string\`
+  Description: Server host
+  Default: \`0.0.0.0\`
 
 ## Database
 
-- **(REQUIRED)** `DATABASE_URL` *(string)*
-  PostgreSQL connection URL
-  Format: `uri`
+- \`DB_HOST\` (required)
+  Type: \`string\`
+  Description: Database host address
 ```
 
 ## API Reference
