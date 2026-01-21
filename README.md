@@ -25,14 +25,14 @@ npm install envase
 
 ## Validation Library Support
 
-Built on the [Standard Schema](https://standardschema.dev) specification,
-Envase works seamlessly with any schema library that implements the spec.
-See the [full list of compatible libraries](https://standardschema.dev#what-schema-libraries-implement-the-spec).
+Built on the [Standard Schema](https://standardschema.dev) specification, Envase works seamlessly with any schema library that implements the spec. The CLI documentation generator additionally requires [Standard JSON Schema](https://standardschema.dev/json-schema) support to introspect and document your schemas.
+
+See the full list of compatible libraries: [Standard Schema](https://standardschema.dev#what-schema-libraries-implement-the-spec) | [Standard JSON Schema](https://standardschema.dev/json-schema#what-schema-libraries-support-this-spec).
 
 Popular options include:
-- [Zod](https://zod.dev)
-- [Valibot](https://valibot.dev)
-- [ArkType](https://arktype.io)
+- [Zod](https://zod.dev) - v3.24+ (Standard Schema), v4.2+ (JSON Schema)
+- [Valibot](https://valibot.dev) - v1.0+ (Standard Schema), v1.2+ (JSON Schema via `@valibot/to-json-schema`)
+- [ArkType](https://arktype.io) - v2.0+ (Standard Schema), v2.1.28+ (JSON Schema)
 
 ## Key features
 
