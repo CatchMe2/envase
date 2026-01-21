@@ -33,18 +33,21 @@ export const generateMarkdown = (
         target: 'openapi-3.0',
       });
 
-      const type = Array.isArray(schema.type)
-        ? schema.type.join(' | ')
-        : schema.type;
+      const mappedType = Array.isArray(schema.anyOf) ? schema.anyOf.map((schema) => schema.type) : schema.type;
+
+      const type = Array.isArray(mappedType)
+        ? mappedType.map((type) => `\`${type}\``).join(' | ')
+        : `\`${mappedType}\``;
 
       const validationResult = envvar.schema['~standard'].validate(undefined);
       const isOptional = 'value' in validationResult;
 
-      const requiredPrefix = isOptional ? '' : '**(REQUIRED)** ';
-      let line = `- ${requiredPrefix}\`${envvar.envName}\` *(${type})*`;
+      let line = `- \`${envvar.envName}\` (${isOptional ? 'optional' : 'required'})`;
+
+      line += `  \n  Type: ${type}`;
 
       if (schema.description) {
-        line += `  \n  ${schema.description}`;
+        line += `  \n  Description: ${schema.description}`;
       }
 
       if (Array.isArray(schema.enum)) {
@@ -52,26 +55,26 @@ export const generateMarkdown = (
         line += `  \n  Supported values: ${enumValues}`;
       }
 
-      if (schema.pattern) {
-        line += `  \n  Pattern: \`${schema.pattern}\``;
-      }
       if (schema.format) {
         line += `  \n  Format: \`${schema.format}\``;
       }
-      if (schema.default) {
-        line += `  \n  Default: \`${schema.default}\``;
+      if (schema.pattern) {
+        line += `  \n  Pattern: \`${schema.pattern}\``;
       }
       if (schema.minimum !== undefined) {
-        line += `  \n  Minimum: \`${schema.minimum}\``;
+        line += `  \n  Min value: \`${schema.minimum}\``;
       }
       if (schema.maximum !== undefined) {
-        line += `  \n  Maximum: \`${schema.maximum}\``;
+        line += `  \n  Max value: \`${schema.maximum}\``;
       }
       if (schema.minLength !== undefined) {
         line += `  \n  Min length: \`${schema.minLength}\``;
       }
       if (schema.maxLength !== undefined) {
         line += `  \n  Max length: \`${schema.maxLength}\``;
+      }
+      if (schema.default !== undefined) {
+        line += `  \n  Default: \`${schema.default}\``;
       }
 
       lines.push(line, '');
