@@ -3,22 +3,21 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { cac } from 'cac';
-import { extractEnvvars} from './extract-envvars.ts';
+import { extractEnvvars } from './extract-envvars.ts';
 import { generateMarkdown } from './generate-markdown.ts';
 import { loadSchema } from './load-schema.ts';
 
+const cli = cac('envase');
 
-const main = cac('envase-docs');
-
-main
+cli
   .command(
-    '<schema>',
+    'generate <schemaPath>',
     'Generate markdown documentation from environment schema',
   )
   .option('-o, --output <file>', 'Output markdown file path', {
     default: './env-docs.md',
   })
-  .example('envase-docs ./config.js -o docs/environment.md')
+  .example('envase generate ./config.js -o docs/environment.md')
   .action(
     async (
       schemaPath: string,
@@ -47,5 +46,5 @@ main
     },
   );
 
-main.help();
-main.parse();
+cli.help();
+cli.parse();

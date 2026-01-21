@@ -19,8 +19,10 @@ export const loadSchema = async (filePath: string): Promise<EnvSchema> => {
   const schema = module.default;
 
   if (typeof schema !== 'object' || schema === null) {
-    throw new Error('No schema export found. Please export your schema as: "export default { ... }"');
+    throw new Error(
+      'No schema export found. Please export your schema as: "export default { ... }"',
+    );
   }
 
   return schema as EnvSchema;
-}
+};

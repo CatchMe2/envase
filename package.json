@@ -40,7 +40,7 @@
     "prepublishOnly": "npm run build"
   },
   "bin": {
-    "envase": "src/cli/main.ts"
+    "envase": "dist/cli/main.ts"
   },
   "dependencies": {
     "cac": "^6.7.14",

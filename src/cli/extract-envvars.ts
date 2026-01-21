@@ -1,5 +1,8 @@
+import type {
+  StandardJSONSchemaV1,
+  StandardSchemaV1,
+} from '../standard-schema.ts';
 import type { EnvSchema } from '../types.ts';
-import type {StandardJSONSchemaV1, StandardSchemaV1} from "../standard-schema.ts";
 
 export interface ExtractedEnvvar {
   /** Environment variable name */
@@ -10,9 +13,18 @@ export interface ExtractedEnvvar {
   schema: StandardSchemaV1 & StandardJSONSchemaV1;
 }
 
-const isStandardJsonSchema = (value: unknown): value is StandardJSONSchemaV1 => {
-  return value !== null && typeof value === 'object' && '~standard' in value && value['~standard'] !== null && typeof value['~standard'] === 'object' && 'jsonSchema' in value['~standard'];
-}
+const isStandardJsonSchema = (
+  value: unknown,
+): value is StandardJSONSchemaV1 => {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    '~standard' in value &&
+    value['~standard'] !== null &&
+    typeof value['~standard'] === 'object' &&
+    'jsonSchema' in value['~standard']
+  );
+};
 
 /**
  * Extracts all envvar entries from a nested envase schema.
@@ -29,7 +41,7 @@ export const extractEnvvars = (
       const [envName, standardSchema] = value;
 
       if (!isStandardJsonSchema(standardSchema)) {
-        throw new Error('Passed schema is not json schema')
+        throw new Error('Passed schema is not json schema');
       }
 
       extractedEnvvars.push({
@@ -43,4 +55,4 @@ export const extractEnvvars = (
   }
 
   return extractedEnvvars;
-}
+};
