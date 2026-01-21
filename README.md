@@ -42,7 +42,7 @@ Popular options include:
 import { parseEnv, envvar } from 'envase';
 import { z } from 'zod';
 
-const config = parseEnv(process.env, {
+const envSchema = {
   app: {
     listen: {
       port: envvar('PORT', z.coerce.number().int().min(0).max(65535)),
@@ -52,7 +52,9 @@ const config = parseEnv(process.env, {
     host: envvar('DB_HOST', z.string().min(1).default('localhost')),
   },
   apiKey: envvar('API_KEY', z.string().min(32).optional()),
-});
+};
+
+const config = parseEnv(process.env, envSchema)
 // config.app.listen.port -> number
 // config.db.host -> string
 // config.apiKey -> string | undefined
@@ -140,10 +142,10 @@ Automatically generate markdown documentation from your environment variable sch
 
 ```typescript
 // config.ts
-import { envvar } from 'envase';
+import { envvar, parseEnv } from 'envase';
 import { z } from 'zod';
 
-export default {
+const envSchema = {
   app: {
     listen: {
       port: envvar('PORT', z.coerce.number().int().min(1024).max(65535)
@@ -157,6 +159,10 @@ export default {
       .describe('PostgreSQL connection URL')),
   },
 };
+
+export const config = parseEnv(process.env, envSchema);
+
+export default envSchema
 ```
 
 **2. Generate documentation:**
@@ -175,7 +181,7 @@ envase generate ./config.js -o ./docs/env.md
 
 ### Command Reference
 
-#### `envase generate <schema>`
+#### `envase generate <schemaPath>`
 
 Generates markdown documentation from an environment schema.
 
@@ -189,7 +195,7 @@ Generates markdown documentation from an environment schema.
 
 The CLI generates readable markdown documentation with:
 - Type information for each environment variable
-- Required/optional status with **(REQUIRED)** marker
+- Required/optional status
 - Default values
 - Descriptions (from `.describe()` calls)
 - Constraints (min, max, minLength, maxLength, pattern, format, etc.)
@@ -201,25 +207,25 @@ The CLI generates readable markdown documentation with:
 ```markdown
 # Environment variables
 
-## App
+## App / Listen
 
 - \`PORT\` (optional)
   Type: \`number\`
-  Description: Server port
+  Description: Application listening port
   Min value: \`1024\`
   Max value: \`65535\`
-  Default: \`3000\`
 
 - \`HOST\` (optional)
   Type: \`string\`
-  Description: Server host
+  Description: Bind host address
   Default: \`0.0.0.0\`
 
 ## Database
 
-- \`DB_HOST\` (required)
+- \`DATABASE_URL\` (required)
   Type: \`string\`
-  Description: Database host address
+  Description: PostgreSQL connection URL
+  Format: \`uri\`
 ```
 
 ## API Reference
