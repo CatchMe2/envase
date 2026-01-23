@@ -12,10 +12,14 @@ export const generateMarkdown = (
 
   for (const envvar of extractedEnvvars) {
     const key = envvar.path.length > 0 ? envvar.path.join('.') : '';
-    if (!envvarsByPath.has(key)) {
-      envvarsByPath.set(key, []);
+
+    const envvars = envvarsByPath.get(key);
+
+    if (envvars) {
+      envvars.push(envvar);
+    } else {
+      envvarsByPath.set(key, [envvar]);
     }
-    envvarsByPath.get(key)?.push(envvar);
   }
 
   for (const [path, envvars] of envvarsByPath.entries()) {
