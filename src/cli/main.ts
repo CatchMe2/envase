@@ -70,9 +70,7 @@ cli
       const result = validateMarkdown(actualMarkdown, expectedMarkdown);
 
       if (result.isValid) {
-        console.log(
-          'Validation passed! The markdown file matches the schema.',
-        );
+        console.log('Validation passed! The markdown file matches the schema.');
         process.exit(0);
       }
 
