@@ -191,6 +191,28 @@ Generates markdown documentation from an environment schema.
 **Options:**
 - `-o, --output <file>` - Output file path (default: `./env-docs.md`)
 
+#### `envase validate <schemaPath> <markdownPath>`
+
+Validates if a markdown file matches the documentation that would be generated from the environment schema.
+
+**Arguments:**
+- `<schemaPath>` - Path to a file containing default export of env schema
+- `<markdownPath>` - Path to the markdown file to validate
+
+**Example:**
+```bash
+envase validate ./config.ts ./docs/env.md
+```
+
+This command is useful for:
+- CI/CD pipelines to ensure documentation stays in sync with code
+- Pre-commit hooks to verify documentation changes
+- Detecting manual edits to generated documentation
+
+**Exit codes:**
+- `0` - Validation passed (markdown matches schema)
+- `1` - Validation failed (differences found) or error occurred
+
 ### Example Output
 
 The CLI generates readable markdown documentation with:
