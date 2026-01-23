@@ -1,9 +1,16 @@
+import { styleText } from 'node:util';
+import { diffLines } from 'diff';
+
 const normalizeMarkdown = (content: string): string => {
   return content
     .trim()
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n');
 };
+
+type ValidateMarkdownOutput =
+  | { isValid: true }
+  | { isValid: false; differences: string };
 
 /**
  * Validates if a markdown file matches the expected documentation
@@ -12,39 +19,37 @@ const normalizeMarkdown = (content: string): string => {
 export const validateMarkdown = (
   actualMarkdown: string,
   expectedMarkdown: string,
-): { isValid: boolean; differences: string[] } => {
-  const differences: string[] = [];
-
+): ValidateMarkdownOutput => {
   const actual = normalizeMarkdown(actualMarkdown);
   const expected = normalizeMarkdown(expectedMarkdown);
 
   if (actual === expected) {
-    return { isValid: true, differences: [] };
+    return { isValid: true };
   }
 
-  const actualLines = actual.split('\n');
-  const expectedLines = expected.split('\n');
+  const differences = diffLines(actual, expected)
+    .flatMap((change) => {
+      const lines = change.value.split('\n');
 
-  const maxLines = Math.max(actualLines.length, expectedLines.length);
+      // Only remove last element if it's empty (due to trailing newline)
+      const linesToProcess =
+        lines.length > 0 && lines[lines.length - 1] === ''
+          ? lines.slice(0, -1)
+          : lines;
 
-  for (let i = 0; i < maxLines; i++) {
-    const actualLine = actualLines[i] ?? '';
-    const expectedLine = expectedLines[i] ?? '';
+      return linesToProcess.map((line) => {
+        if (change.added) {
+          return styleText('green', `+ ${line}`);
+        }
+        if (change.removed) {
+          return styleText('red', `- ${line}`);
+        }
+        return styleText('gray', `  ${line}`);
+      });
+    })
+    .join('\n');
 
-    if (actualLine !== expectedLine) {
-      if (i >= actualLines.length) {
-        differences.push(`Line ${i + 1}: Missing in actual file`);
-        differences.push(`  Expected: ${expectedLine}`);
-      } else if (i >= expectedLines.length) {
-        differences.push(`Line ${i + 1}: Extra line in actual file`);
-        differences.push(`  Actual: ${actualLine}`);
-      } else {
-        differences.push(`Line ${i + 1}: Content mismatch`);
-        differences.push(`  Expected: ${expectedLine}`);
-        differences.push(`  Actual:   ${actualLine}`);
-      }
-    }
-  }
+  console.log(differences);
 
   return {
     isValid: false,

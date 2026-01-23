@@ -75,9 +75,10 @@ cli
       }
 
       console.error('Validation failed! Found differences:\n');
-      for (const diff of result.differences) {
-        console.error(diff);
-      }
+      console.error(result.differences);
+
+      console.error('\nTo regenerate documentation:');
+      console.error(`  envase generate ${schemaPath} -o ${markdownPath}`);
       process.exit(1);
     } catch (error) {
       console.error(
