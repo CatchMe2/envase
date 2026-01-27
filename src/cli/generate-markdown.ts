@@ -37,7 +37,7 @@ export const generateMarkdown = (
         target: 'openapi-3.0',
         libraryOptions: {
           unrepresentable: 'any',
-        }
+        },
       });
 
       const mappedType = Array.isArray(schema.anyOf)
