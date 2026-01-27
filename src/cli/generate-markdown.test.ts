@@ -40,6 +40,7 @@ describe('generateMarkdown', () => {
         schema: z
           .string()
           .default('0.0.0.0')
+          .transform((val) => val)
           .optional()
           .describe('Server host'),
       },
