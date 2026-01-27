@@ -33,8 +33,11 @@ export const generateMarkdown = (
     }
 
     for (const envvar of envvars) {
-      const schema = envvar.schema['~standard'].jsonSchema.output({
+      const schema = envvar.schema['~standard'].jsonSchema.input({
         target: 'openapi-3.0',
+        libraryOptions: {
+          unrepresentable: 'any',
+        }
       });
 
       const mappedType = Array.isArray(schema.anyOf)
