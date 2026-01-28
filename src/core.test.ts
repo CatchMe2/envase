@@ -330,5 +330,103 @@ describe('core', () => {
       expect(_connStr).toBe('localhost:5432');
       expect(_portPlusTen).toBe(5442);
     });
+
+    it('deep merges nested computed values with schema', () => {
+      const config = createConfig(
+        {
+          AWS_ACCESS_KEY_ID: 'AKIAIOSFODNN7EXAMPLE',
+          AWS_SECRET_ACCESS_KEY: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        },
+        {
+          schema: {
+            aws: {
+              accessKeyId: envvar('AWS_ACCESS_KEY_ID', z.string()),
+              secretAccessKey: envvar('AWS_SECRET_ACCESS_KEY', z.string()),
+            },
+          },
+          computed: {
+            aws: {
+              credentials: (raw) => ({
+                accessKeyId: raw.aws.accessKeyId,
+                secretAccessKey: raw.aws.secretAccessKey,
+              }),
+            },
+          },
+        },
+      );
+
+      // Verify schema values are preserved
+      expect(config.aws.accessKeyId).toBe('AKIAIOSFODNN7EXAMPLE');
+      expect(config.aws.secretAccessKey).toBe(
+        'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+      );
+
+      // Verify computed value is merged in
+      expect(config.aws.credentials).toEqual({
+        accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+        secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+      });
+
+      // Type assertions
+      const _accessKeyId: string = config.aws.accessKeyId;
+      const _credentials: {
+        accessKeyId: string;
+        secretAccessKey: string;
+      } = config.aws.credentials;
+
+      expect(_accessKeyId).toBeDefined();
+      expect(_credentials).toBeDefined();
+    });
+
+    it('supports multiple levels of nested computed values', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          db: {
+            host: envvar('DB_HOST', z.string()),
+            port: envvar('DB_PORT', z.coerce.number()),
+            name: envvar('DB_NAME', z.string()),
+          },
+        },
+        computed: {
+          db: {
+            connection: {
+              url: (raw) =>
+                `postgres://${raw.db.host}:${raw.db.port}/${raw.db.name}`,
+            },
+          },
+        },
+      });
+
+      expect(config.db.host).toBe('localhost');
+      expect(config.db.port).toBe(5432);
+      expect(config.db.name).toBe('mydb');
+      expect(config.db.connection.url).toBe('postgres://localhost:5432/mydb');
+    });
+
+    it('allows mixing flat and nested computed values', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          db: {
+            host: envvar('DB_HOST', z.string()),
+            port: envvar('DB_PORT', z.coerce.number()),
+          },
+          api: {
+            key: envvar('API_KEY', z.string()),
+          },
+        },
+        computed: {
+          // Flat computed value at root
+          dbUrl: (raw) => `${raw.db.host}:${raw.db.port}`,
+          // Nested computed value
+          api: {
+            keyPrefix: (raw) => raw.api.key.slice(0, 4),
+          },
+        },
+      });
+
+      expect(config.dbUrl).toBe('localhost:5432');
+      expect(config.api.key).toBe('secret123');
+      expect(config.api.keyPrefix).toBe('secr');
+    });
   });
 });

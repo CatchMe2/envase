@@ -29,16 +29,40 @@ export type EnvvarValidationIssue = {
   messages: string[];
 };
 
-// Schema for computed values - keys map to resolver functions
-export type ComputedSchema<TRaw> = Record<string, (raw: TRaw) => unknown>;
+// Resolver function type for computed values
+// biome-ignore lint/suspicious/noExplicitAny: Required for type inference
+type ComputedResolver = (raw: any) => unknown;
 
-// Infer output types from computed schema
-export type InferComputed<T> = {
-  // biome-ignore lint/suspicious/noExplicitAny: Required for type inference
-  [K in keyof T]: T[K] extends (raw: any) => infer R ? R : never;
+// Schema for computed values - can be nested objects or resolver functions
+export type ComputedSchema<TRaw> = {
+  [key: string]: ((raw: TRaw) => unknown) | ComputedSchema<TRaw>;
 };
 
-// Combined result type (raw config merged with computed values)
+// Infer output types from computed schema (handles nested structures)
+export type InferComputed<T> = {
+  [K in keyof T]: T[K] extends ComputedResolver
+    ? ReturnType<T[K]>
+    : T[K] extends object
+      ? InferComputed<T[K]>
+      : never;
+};
+
+// Deep merge two types (TComputed values override TRaw where keys overlap)
+type DeepMerge<TRaw, TComputed> = {
+  [K in keyof TRaw | keyof TComputed]: K extends keyof TComputed
+    ? K extends keyof TRaw
+      ? TRaw[K] extends object
+        ? TComputed[K] extends object
+          ? DeepMerge<TRaw[K], TComputed[K]>
+          : TComputed[K]
+        : TComputed[K]
+      : TComputed[K]
+    : K extends keyof TRaw
+      ? TRaw[K]
+      : never;
+};
+
+// Combined result type (raw config deep merged with computed values)
 export type InferConfig<TRaw, TComputed> = SimplifyDeep<
-  TRaw & InferComputed<TComputed>
+  DeepMerge<TRaw, InferComputed<TComputed>>
 >;

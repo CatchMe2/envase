@@ -79,6 +79,56 @@ export const parseEnv = <T extends EnvSchema>(
   return config;
 };
 
+// Helper to check if value is a resolver function
+const isResolver = (value: unknown): value is (raw: unknown) => unknown =>
+  typeof value === 'function';
+
+// Helper to process computed schema recursively
+const processComputed = (
+  computed: Record<string, unknown>,
+  rawConfig: unknown,
+): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(computed).map(([key, value]) => [
+      key,
+      isResolver(value)
+        ? value(rawConfig)
+        : processComputed(value as Record<string, unknown>, rawConfig),
+    ]),
+  );
+};
+
+// Helper to deep merge two objects
+const deepMerge = (
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+): Record<string, unknown> => {
+  const result = { ...target };
+
+  for (const key of Object.keys(source)) {
+    const sourceValue = source[key];
+    const targetValue = result[key];
+
+    if (
+      sourceValue &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
+    ) {
+      result[key] = deepMerge(
+        targetValue as Record<string, unknown>,
+        sourceValue as Record<string, unknown>,
+      );
+    } else {
+      result[key] = sourceValue;
+    }
+  }
+
+  return result;
+};
+
 // Overload: without computed
 export function createConfig<TSchema extends EnvSchema>(
   env: Record<string, string | undefined>,
@@ -120,14 +170,12 @@ export function createConfig<
     return rawConfig;
   }
 
-  // Compute derived values
-  const computedValues = Object.fromEntries(
-    Object.entries(options.computed).map(([key, resolver]) => [
-      key,
-      resolver(rawConfig),
-    ]),
+  // Compute derived values (handles nested structures)
+  const computedValues = processComputed(
+    options.computed as Record<string, unknown>,
+    rawConfig,
   );
 
-  // Merge raw config with computed values
-  return Object.assign({}, rawConfig, computedValues);
+  // Deep merge raw config with computed values
+  return deepMerge(rawConfig as Record<string, unknown>, computedValues);
 }

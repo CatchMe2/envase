@@ -167,6 +167,67 @@ const config = createConfig(process.env, {
 
 The `raw` parameter in computed functions is fully typed based on your schema, providing autocomplete and type checking. Computed values are calculated after schema validation, so you always work with parsed values (e.g., `port` is a `number`, not a string).
 
+#### Nested Computed Values
+
+Computed values can be nested to merge with your schema structure:
+
+```typescript
+import { createConfig, envvar } from 'envase';
+import { z } from 'zod';
+
+const config = createConfig(process.env, {
+  schema: {
+    aws: {
+      accessKeyId: envvar('AWS_ACCESS_KEY_ID', z.string()),
+      secretAccessKey: envvar('AWS_SECRET_ACCESS_KEY', z.string()),
+    },
+  },
+  computed: {
+    aws: {
+      credentials: (raw) => ({
+        accessKeyId: raw.aws.accessKeyId,
+        secretAccessKey: raw.aws.secretAccessKey,
+      }),
+    },
+  },
+});
+
+// Result type:
+// {
+//   aws: {
+//     accessKeyId: string;
+//     secretAccessKey: string;
+//     credentials: { accessKeyId: string; secretAccessKey: string };
+//   }
+// }
+```
+
+You can also mix flat and nested computed values:
+
+```typescript
+const config = createConfig(process.env, {
+  schema: {
+    db: {
+      host: envvar('DB_HOST', z.string()),
+      port: envvar('DB_PORT', z.coerce.number()),
+    },
+  },
+  computed: {
+    // Flat at root level
+    dbUrl: (raw) => `${raw.db.host}:${raw.db.port}`,
+    // Nested under existing schema key
+    db: {
+      connectionString: (raw) => `postgres://${raw.db.host}:${raw.db.port}`,
+    },
+  },
+});
+
+// config.dbUrl -> string
+// config.db.host -> string
+// config.db.port -> number
+// config.db.connectionString -> string
+```
+
 ## CLI
 
 Automatically generate and validate markdown documentation from your environment variable schemas.
