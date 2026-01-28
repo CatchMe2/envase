@@ -1,4 +1,4 @@
-import type { SimplifyDeep } from 'type-fest';
+import type { MergeDeep, SimplifyDeep } from 'type-fest';
 import type { StandardSchemaV1 } from './standard-schema.ts';
 
 export type NodeEnvInfo = {
@@ -47,22 +47,7 @@ export type InferComputed<T> = {
       : never;
 };
 
-// Deep merge two types (TComputed values override TRaw where keys overlap)
-type DeepMerge<TRaw, TComputed> = {
-  [K in keyof TRaw | keyof TComputed]: K extends keyof TComputed
-    ? K extends keyof TRaw
-      ? TRaw[K] extends object
-        ? TComputed[K] extends object
-          ? DeepMerge<TRaw[K], TComputed[K]>
-          : TComputed[K]
-        : TComputed[K]
-      : TComputed[K]
-    : K extends keyof TRaw
-      ? TRaw[K]
-      : never;
-};
-
 // Combined result type (raw config deep merged with computed values)
 export type InferConfig<TRaw, TComputed> = SimplifyDeep<
-  DeepMerge<TRaw, InferComputed<TComputed>>
+  MergeDeep<TRaw, InferComputed<TComputed>>
 >;

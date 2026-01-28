@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 import { z } from 'zod';
 import { createConfig, detectNodeEnv, envvar, parseEnv } from './core.ts';
 
@@ -427,6 +427,163 @@ describe('core', () => {
       expect(config.dbUrl).toBe('localhost:5432');
       expect(config.api.key).toBe('secret123');
       expect(config.api.keyPrefix).toBe('secr');
+    });
+
+    describe('type inference', () => {
+      it('infers correct types for config without computed values', () => {
+        const config = createConfig(mockEnv, {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string()),
+              port: envvar('DB_PORT', z.coerce.number()),
+            },
+          },
+        });
+
+        expectTypeOf(config).toEqualTypeOf<{
+          db: { host: string; port: number };
+        }>();
+      });
+
+      it('infers correct types for flat computed values', () => {
+        const config = createConfig(mockEnv, {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string()),
+              port: envvar('DB_PORT', z.coerce.number()),
+            },
+          },
+          computed: {
+            url: (raw) => `${raw.db.host}:${raw.db.port}`,
+            portPlusTen: (raw) => raw.db.port + 10,
+          },
+        });
+
+        expectTypeOf(config.db).toEqualTypeOf<{ host: string; port: number }>();
+        expectTypeOf(config.url).toEqualTypeOf<string>();
+        expectTypeOf(config.portPlusTen).toEqualTypeOf<number>();
+      });
+
+      it('infers correct types for nested computed values merged with schema', () => {
+        const config = createConfig(
+          {
+            AWS_ACCESS_KEY_ID: 'test',
+            AWS_SECRET_ACCESS_KEY: 'test',
+          },
+          {
+            schema: {
+              aws: {
+                accessKeyId: envvar('AWS_ACCESS_KEY_ID', z.string()),
+                secretAccessKey: envvar('AWS_SECRET_ACCESS_KEY', z.string()),
+              },
+            },
+            computed: {
+              aws: {
+                credentials: (raw) => ({
+                  key: raw.aws.accessKeyId,
+                  secret: raw.aws.secretAccessKey,
+                }),
+              },
+            },
+          },
+        );
+
+        expectTypeOf(config.aws.accessKeyId).toEqualTypeOf<string>();
+        expectTypeOf(config.aws.secretAccessKey).toEqualTypeOf<string>();
+        expectTypeOf(config.aws.credentials).toEqualTypeOf<{
+          key: string;
+          secret: string;
+        }>();
+      });
+
+      it('infers correct types for deeply nested computed values', () => {
+        const config = createConfig(mockEnv, {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string()),
+              port: envvar('DB_PORT', z.coerce.number()),
+            },
+          },
+          computed: {
+            db: {
+              connection: {
+                url: (raw) => `postgres://${raw.db.host}:${raw.db.port}`,
+                isLocal: (raw) => raw.db.host === 'localhost',
+              },
+            },
+          },
+        });
+
+        expectTypeOf(config.db.host).toEqualTypeOf<string>();
+        expectTypeOf(config.db.port).toEqualTypeOf<number>();
+        expectTypeOf(config.db.connection.url).toEqualTypeOf<string>();
+        expectTypeOf(config.db.connection.isLocal).toEqualTypeOf<boolean>();
+
+        // Also verify runtime behavior
+        expect(config.db.host).toBe('localhost');
+        expect(config.db.port).toBe(5432);
+        expect(config.db.connection.url).toBe('postgres://localhost:5432');
+        expect(config.db.connection.isLocal).toBe(true);
+      });
+
+      it('infers correct types when mixing flat and nested computed values', () => {
+        const config = createConfig(mockEnv, {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string()),
+            },
+            api: {
+              key: envvar('API_KEY', z.string()),
+            },
+          },
+          computed: {
+            isConfigured: (raw) => raw.db.host.length > 0,
+            db: {
+              isLocal: (raw) => raw.db.host === 'localhost',
+            },
+            api: {
+              keyLength: (raw) => raw.api.key.length,
+            },
+          },
+        });
+
+        expectTypeOf(config.db.host).toEqualTypeOf<string>();
+        expectTypeOf(config.db.isLocal).toEqualTypeOf<boolean>();
+        expectTypeOf(config.api.key).toEqualTypeOf<string>();
+        expectTypeOf(config.api.keyLength).toEqualTypeOf<number>();
+        expectTypeOf(config.isConfigured).toEqualTypeOf<boolean>();
+      });
+
+      it('infers optional schema values correctly', () => {
+        const config = createConfig(mockEnv, {
+          schema: {
+            optional: envvar('MISSING', z.string().optional()),
+            withDefault: envvar('ALSO_MISSING', z.string().default('default')),
+          },
+        });
+
+        expectTypeOf(config.optional).toEqualTypeOf<string | undefined>();
+        expectTypeOf(config.withDefault).toEqualTypeOf<string>();
+      });
+
+      it('infers raw parameter type correctly in computed functions', () => {
+        createConfig(mockEnv, {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string()),
+              port: envvar('DB_PORT', z.coerce.number()),
+            },
+          },
+          computed: {
+            test: (raw) => {
+              // Verify raw parameter has correct type
+              expectTypeOf(raw.db.host).toEqualTypeOf<string>();
+              expectTypeOf(raw.db.port).toEqualTypeOf<number>();
+              return true;
+            },
+          },
+        });
+      });
     });
   });
 });
