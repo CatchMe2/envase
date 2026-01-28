@@ -37,7 +37,7 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "lint": "biome check . && tsc",
     "lint:fix": "biome check --write .",
-    "test": "vitest --coverage",
+    "test": "vitest --typecheck --coverage",
     "prepublishOnly": "npm run build"
   },
   "bin": {
@@ -46,17 +46,17 @@
   "dependencies": {
     "cac": "^6.7.14",
     "diff": "^8.0.3",
-    "type-fest": "^5.4.1"
+    "type-fest": "^5.4.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.3",
     "@lokalise/tsconfig": "^2.0.0",
     "@types/node": "^25.0.9",
-    "@vitest/coverage-v8": "^4.0.17",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.9.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.9.3",
     "valibot": "^1.0.0",
-    "vitest": "^4.0.17",
-    "zod": "^4.0.15"
+    "vitest": "^4.0.18",
+    "zod": "^4.3.6"
   }
 }
