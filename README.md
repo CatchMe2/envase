@@ -314,12 +314,13 @@ Validates envvars against the schema and returns a typed configuration object.
 
 ### `createConfig`
 
-`createConfig(env: Record<string, string | undefined>, options: { schema: T, computed?: C })`
+`createConfig(env, options)`
 
-Validates envvars and optionally computes derived values. Returns a merged object containing both the parsed config and computed values.
+Validates envvars and optionally computes derived values. Returns a merged object containing both the parsed config and computed values. All types are inferred from the schema and computed functions.
 
-- `schema` - Environment variable schema (same format as `parseEnv`)
-- `computed` - Optional object where each key is a function receiving the parsed config and returning a derived value
+- `env` - Environment variables object (e.g., `process.env`)
+- `options.schema` - Environment variable schema (same format as `parseEnv`)
+- `options.computed` - Optional object where each key is a function receiving the parsed config and returning a derived value
 
 ### `detectNodeEnv`
 
