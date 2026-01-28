@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { detectNodeEnv, envvar, parseEnv } from './core.ts';
+import { createConfig, detectNodeEnv, envvar, parseEnv } from './core.ts';
 
 describe('core', () => {
   describe('detectNodeEnv', () => {
@@ -215,6 +215,120 @@ describe('core', () => {
         ]
       `);
       });
+    });
+  });
+
+  describe('createConfig', () => {
+    const mockEnv = {
+      DB_HOST: 'localhost',
+      DB_PORT: '5432',
+      DB_NAME: 'mydb',
+      API_KEY: 'secret123',
+    };
+
+    it('parses config without computed values', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          db: {
+            host: envvar('DB_HOST', z.string()),
+            port: envvar('DB_PORT', z.coerce.number()),
+          },
+        },
+      });
+
+      expect(config.db.host).toBe('localhost');
+      expect(config.db.port).toBe(5432);
+    });
+
+    it('computes derived values from raw config', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          db: {
+            host: envvar('DB_HOST', z.string()),
+            port: envvar('DB_PORT', z.coerce.number()),
+            name: envvar('DB_NAME', z.string()),
+          },
+          api: {
+            key: envvar('API_KEY', z.string()),
+          },
+        },
+        computed: {
+          dbConnectionString: (raw) =>
+            `postgres://${raw.db.host}:${raw.db.port}/${raw.db.name}`,
+          apiKeyPrefix: (raw) => raw.api.key.slice(0, 8),
+        },
+      });
+
+      expect(config.db.host).toBe('localhost');
+      expect(config.db.port).toBe(5432);
+      expect(config.db.name).toBe('mydb');
+      expect(config.api.key).toBe('secret123');
+      expect(config.dbConnectionString).toBe('postgres://localhost:5432/mydb');
+      expect(config.apiKeyPrefix).toBe('secret12');
+    });
+
+    it('receives parsed values in computed functions (not raw strings)', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          port: envvar('DB_PORT', z.coerce.number()),
+        },
+        computed: {
+          portPlusTen: (raw) => raw.port + 10,
+        },
+      });
+
+      expect(config.port).toBe(5432);
+      expect(config.portPlusTen).toBe(5442);
+    });
+
+    it('throws EnvaseError if schema validation fails before computing', () => {
+      expect(() =>
+        createConfig(mockEnv, {
+          schema: {
+            missing: envvar('MISSING_VAR', z.string()),
+          },
+          computed: {
+            derived: (raw) => raw.missing.toUpperCase(),
+          },
+        }),
+      ).toThrow();
+    });
+
+    it('works with empty computed object', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          host: envvar('DB_HOST', z.string()),
+        },
+        computed: {},
+      });
+
+      expect(config.host).toBe('localhost');
+    });
+
+    it('infers types correctly for raw parameter and return values', () => {
+      const config = createConfig(mockEnv, {
+        schema: {
+          db: {
+            host: envvar('DB_HOST', z.string()),
+            port: envvar('DB_PORT', z.coerce.number()),
+          },
+        },
+        computed: {
+          connectionString: (raw) => `${raw.db.host}:${raw.db.port}`,
+          portPlusTen: (raw) => raw.db.port + 10,
+        },
+      });
+
+      // These type assertions verify compile-time inference
+      const _host: string = config.db.host;
+      const _port: number = config.db.port;
+      const _connStr: string = config.connectionString;
+      const _portPlusTen: number = config.portPlusTen;
+
+      expect(_host).toBe('localhost');
+      expect(_port).toBe(5432);
+      expect(_connStr).toBe('localhost:5432');
+      expect(_portPlusTen).toBe(5442);
     });
   });
 });

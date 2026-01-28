@@ -11,6 +11,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 - 🔌 **Standard Schema compliant** - Works with any compatible validation library
 - 🌐 **Runtime agnostic** - Runs anywhere (Node, Bun, Deno, browsers)
 - 🏗️ **Structured configuration** - Supports nested config objects
+- 🧮 **Computed values** - Derive values from parsed config with full type inference
 - 🚦 **Environment detection** - `isProduction`, `isTest`, `isDevelopment` flags
 - 📜 **Detailed error reporting** - See all validation failures at once
 - 🚀 **Lightweight** - Single dependency (type-fest), zero runtime overhead
@@ -131,6 +132,40 @@ const envSchema = {
 type Config = InferEnv<typeof envSchema>;
 // { apiKey: string; db: { host: string } }
 ```
+
+### Computed Values
+
+Use `createConfig` to derive computed values from your parsed configuration with full type inference:
+
+```typescript
+import { createConfig, envvar } from 'envase';
+import { z } from 'zod';
+
+const config = createConfig(process.env, {
+  schema: {
+    db: {
+      host: envvar('DB_HOST', z.string()),
+      port: envvar('DB_PORT', z.coerce.number()),
+      name: envvar('DB_NAME', z.string()),
+    },
+    api: {
+      key: envvar('API_KEY', z.string()),
+    },
+  },
+  computed: {
+    dbConnectionString: (raw) =>
+      `postgres://${raw.db.host}:${raw.db.port}/${raw.db.name}`,
+    apiKeyPrefix: (raw) => raw.api.key.slice(0, 8),
+  },
+});
+
+// config.db.host -> string
+// config.db.port -> number
+// config.dbConnectionString -> string
+// config.apiKeyPrefix -> string
+```
+
+The `raw` parameter in computed functions is fully typed based on your schema, providing autocomplete and type checking. Computed values are calculated after schema validation, so you always work with parsed values (e.g., `port` is a `number`, not a string).
 
 ## CLI
 
@@ -276,6 +311,15 @@ This helps pair the raw env name with the shape you expect it to conform to.
 `parseEnv(env: Record<string, string | undefined>, envSchema: T)`
 
 Validates envvars against the schema and returns a typed configuration object.
+
+### `createConfig`
+
+`createConfig(env: Record<string, string | undefined>, options: { schema: T, computed?: C })`
+
+Validates envvars and optionally computes derived values. Returns a merged object containing both the parsed config and computed values.
+
+- `schema` - Environment variable schema (same format as `parseEnv`)
+- `computed` - Optional object where each key is a function receiving the parsed config and returning a derived value
 
 ### `detectNodeEnv`
 

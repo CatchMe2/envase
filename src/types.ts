@@ -28,3 +28,17 @@ export type EnvvarValidationIssue = {
   value?: string;
   messages: string[];
 };
+
+// Schema for computed values - keys map to resolver functions
+export type ComputedSchema<TRaw> = Record<string, (raw: TRaw) => unknown>;
+
+// Infer output types from computed schema
+export type InferComputed<T> = {
+  // biome-ignore lint/suspicious/noExplicitAny: Required for type inference
+  [K in keyof T]: T[K] extends (raw: any) => infer R ? R : never;
+};
+
+// Combined result type (raw config merged with computed values)
+export type InferConfig<TRaw, TComputed> = SimplifyDeep<
+  TRaw & InferComputed<TComputed>
+>;
