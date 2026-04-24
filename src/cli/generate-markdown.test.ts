@@ -17,7 +17,17 @@ describe('generateMarkdown', () => {
       {
         envName: 'API_KEY',
         path: [],
-        schema: z.string().min(32).describe('Your API key for authentication'),
+        schema: z.string().min(32).max(255).describe('Your API key for authentication'),
+      },
+      {
+        envName: 'RATIO',
+        path: [],
+        schema: z.number().describe('Cache hit ratio'),
+      },
+      {
+        envName: 'SCORE_DELTA',
+        path: [],
+        schema: z.number().int().describe('Score adjustment, negative values reduce score'),
       },
       {
         envName: 'LOG_LEVEL',
@@ -29,6 +39,7 @@ describe('generateMarkdown', () => {
         path: ['app', 'server'],
         schema: z
           .number()
+          .int()
           .min(1024)
           .max(65535)
           .default(3000)

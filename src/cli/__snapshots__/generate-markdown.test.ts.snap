@@ -6,7 +6,16 @@ exports[`generateMarkdown > generates complete markdown with all features 1`] = 
 - \`API_KEY\` (required)  
   Type: \`string\`  
   Description: Your API key for authentication  
-  Min length: \`32\`
+  Min length: \`32\`  
+  Max length: \`255\`
+
+- \`RATIO\` (required)  
+  Type: \`number\`  
+  Description: Cache hit ratio
+
+- \`SCORE_DELTA\` (required)  
+  Type: \`integer\`  
+  Description: Score adjustment, negative values reduce score
 
 ## App
 
@@ -18,7 +27,7 @@ exports[`generateMarkdown > generates complete markdown with all features 1`] = 
 ## App Server
 
 - \`PORT\` (optional)  
-  Type: \`number\`  
+  Type: \`integer\`  
   Description: Server port  
   Min value: \`1024\`  
   Max value: \`65535\`  
