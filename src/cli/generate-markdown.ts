@@ -70,10 +70,22 @@ export const generateMarkdown = (
       if (schema.pattern) {
         line += `  \n  Pattern: \`${schema.pattern}\``;
       }
-      if (schema.minimum !== undefined) {
+      if (
+        schema.minimum !== undefined &&
+        !(
+          schema.type === 'integer' &&
+          schema.minimum === Number.MIN_SAFE_INTEGER
+        )
+      ) {
         line += `  \n  Min value: \`${schema.minimum}\``;
       }
-      if (schema.maximum !== undefined) {
+      if (
+        schema.maximum !== undefined &&
+        !(
+          schema.type === 'integer' &&
+          schema.maximum === Number.MAX_SAFE_INTEGER
+        )
+      ) {
         line += `  \n  Max value: \`${schema.maximum}\``;
       }
       if (schema.minLength !== undefined) {
