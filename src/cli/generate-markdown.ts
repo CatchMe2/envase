@@ -72,13 +72,19 @@ export const generateMarkdown = (
       }
       if (
         schema.minimum !== undefined &&
-        !(schema.type === 'integer' && schema.minimum === Number.MIN_SAFE_INTEGER)
+        !(
+          schema.type === 'integer' &&
+          schema.minimum === Number.MIN_SAFE_INTEGER
+        )
       ) {
         line += `  \n  Min value: \`${schema.minimum}\``;
       }
       if (
         schema.maximum !== undefined &&
-        !(schema.type === 'integer' && schema.maximum === Number.MAX_SAFE_INTEGER)
+        !(
+          schema.type === 'integer' &&
+          schema.maximum === Number.MAX_SAFE_INTEGER
+        )
       ) {
         line += `  \n  Max value: \`${schema.maximum}\``;
       }

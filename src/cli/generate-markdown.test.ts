@@ -17,7 +17,11 @@ describe('generateMarkdown', () => {
       {
         envName: 'API_KEY',
         path: [],
-        schema: z.string().min(32).max(255).describe('Your API key for authentication'),
+        schema: z
+          .string()
+          .min(32)
+          .max(255)
+          .describe('Your API key for authentication'),
       },
       {
         envName: 'RATIO',
@@ -27,7 +31,10 @@ describe('generateMarkdown', () => {
       {
         envName: 'SCORE_DELTA',
         path: [],
-        schema: z.number().int().describe('Score adjustment, negative values reduce score'),
+        schema: z
+          .number()
+          .int()
+          .describe('Score adjustment, negative values reduce score'),
       },
       {
         envName: 'LOG_LEVEL',
