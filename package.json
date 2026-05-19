@@ -2,7 +2,7 @@
   "name": "envase",
   "version": "1.4.0",
   "type": "module",
-  "packageManager": "npm@11.4.2",
+  "packageManager": "pnpm@11.1.0",
   "author": "Mateusz Tkacz",
   "homepage": "https://github.com/CatchMe2/envase",
   "repository": {
@@ -38,7 +38,7 @@
     "lint": "biome check . && tsc",
     "lint:fix": "biome check --write .",
     "test": "vitest --typecheck --coverage",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "bin": {
     "envase": "dist/cli/main.js"
