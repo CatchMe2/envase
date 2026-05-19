@@ -5,7 +5,8 @@ import { generateMarkdown } from './generate-markdown.ts';
 
 const stringToNumberSchema = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess(
-    (val): number | undefined => (val === undefined || val === '' ? undefined : Number(val)),
+    (val): number | undefined =>
+      val === undefined || val === '' ? undefined : Number(val),
     schema,
   );
 

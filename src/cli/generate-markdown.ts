@@ -40,12 +40,14 @@ export const generateMarkdown = (
         },
       };
 
-      const inputSchema = envvar.schema['~standard'].jsonSchema.input(jsonSchemaOptions);
-      const outputSchema = envvar.schema['~standard'].jsonSchema.output(jsonSchemaOptions);
+      const inputSchema =
+        envvar.schema['~standard'].jsonSchema.input(jsonSchemaOptions);
+      const outputSchema =
+        envvar.schema['~standard'].jsonSchema.output(jsonSchemaOptions);
 
       const mappedType = Array.isArray(outputSchema.anyOf)
         ? outputSchema.anyOf.map(({ type }) => type)
-        : outputSchema.type ?? inputSchema.type;
+        : (outputSchema.type ?? inputSchema.type);
 
       const type = Array.isArray(mappedType)
         ? mappedType.map((type) => `\`${type}\``).join(' | ')
