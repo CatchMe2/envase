@@ -11,15 +11,15 @@ const stringToNumberSchema = <T extends z.ZodTypeAny>(schema: T) =>
   );
 
 describe('generateMarkdown', () => {
-  it('handles empty array of environment variables', () => {
+  it('handles empty array of environment variables', async () => {
     const extractedEnvvars: ExtractedEnvvar[] = [];
 
-    const markdown = generateMarkdown(extractedEnvvars);
+    const markdown = await generateMarkdown(extractedEnvvars);
 
     expect(markdown).toBe('# Environment variables\n');
   });
 
-  it('generates complete markdown with all features', () => {
+  it('generates complete markdown with all features', async () => {
     const extractedEnvvars: ExtractedEnvvar[] = [
       {
         envName: 'API_KEY',
@@ -76,7 +76,7 @@ describe('generateMarkdown', () => {
       },
     ];
 
-    const markdown = generateMarkdown(extractedEnvvars);
+    const markdown = await generateMarkdown(extractedEnvvars);
 
     expect(markdown).toMatchSnapshot();
   });

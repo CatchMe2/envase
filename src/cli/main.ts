@@ -32,7 +32,7 @@ cli
         const extractedEnvvars = extractEnvvars(schema);
 
         console.log('Generating markdown documentation...');
-        const markdown = generateMarkdown(extractedEnvvars);
+        const markdown = await generateMarkdown(extractedEnvvars);
 
         const outputPath = resolve(process.cwd(), options.output);
         await writeFile(outputPath, markdown, 'utf-8');
@@ -60,7 +60,7 @@ cli
       const extractedEnvvars = extractEnvvars(schema);
 
       console.log('Generating expected markdown...');
-      const expectedMarkdown = generateMarkdown(extractedEnvvars);
+      const expectedMarkdown = await generateMarkdown(extractedEnvvars);
 
       console.log('Reading actual markdown from:', markdownPath);
       const markdownFilePath = resolve(process.cwd(), markdownPath);
