@@ -33,16 +33,21 @@ export const generateMarkdown = (
     }
 
     for (const envvar of envvars) {
-      const schema = envvar.schema['~standard'].jsonSchema.input({
+      const jsonSchemaOptions = {
         target: 'openapi-3.0',
         libraryOptions: {
           unrepresentable: 'any',
         },
-      });
+      };
 
-      const mappedType = Array.isArray(schema.anyOf)
-        ? schema.anyOf.map((schema) => schema.type)
-        : schema.type;
+      const inputSchema =
+        envvar.schema['~standard'].jsonSchema.input(jsonSchemaOptions);
+      const outputSchema =
+        envvar.schema['~standard'].jsonSchema.output(jsonSchemaOptions);
+
+      const mappedType = Array.isArray(outputSchema.anyOf)
+        ? outputSchema.anyOf.map(({ type }) => type)
+        : (outputSchema.type ?? inputSchema.type);
 
       const type = Array.isArray(mappedType)
         ? mappedType.map((type) => `\`${type}\``).join(' | ')
@@ -55,47 +60,47 @@ export const generateMarkdown = (
 
       line += `  \n  Type: ${type}`;
 
-      if (schema.description) {
-        line += `  \n  Description: ${schema.description}`;
+      if (inputSchema.description) {
+        line += `  \n  Description: ${inputSchema.description}`;
       }
 
-      if (Array.isArray(schema.enum)) {
-        const enumValues = schema.enum.map((v) => `\`${v}\``).join(' | ');
+      if (Array.isArray(inputSchema.enum)) {
+        const enumValues = inputSchema.enum.map((v) => `\`${v}\``).join(' | ');
         line += `  \n  Supported values: ${enumValues}`;
       }
 
-      if (schema.format) {
-        line += `  \n  Format: \`${schema.format}\``;
+      if (inputSchema.format) {
+        line += `  \n  Format: \`${inputSchema.format}\``;
       }
-      if (schema.pattern) {
-        line += `  \n  Pattern: \`${schema.pattern}\``;
-      }
-      if (
-        schema.minimum !== undefined &&
-        !(
-          schema.type === 'integer' &&
-          schema.minimum === Number.MIN_SAFE_INTEGER
-        )
-      ) {
-        line += `  \n  Min value: \`${schema.minimum}\``;
+      if (inputSchema.pattern) {
+        line += `  \n  Pattern: \`${inputSchema.pattern}\``;
       }
       if (
-        schema.maximum !== undefined &&
+        inputSchema.minimum !== undefined &&
         !(
-          schema.type === 'integer' &&
-          schema.maximum === Number.MAX_SAFE_INTEGER
+          inputSchema.type === 'integer' &&
+          inputSchema.minimum === Number.MIN_SAFE_INTEGER
         )
       ) {
-        line += `  \n  Max value: \`${schema.maximum}\``;
+        line += `  \n  Min value: \`${inputSchema.minimum}\``;
       }
-      if (schema.minLength !== undefined) {
-        line += `  \n  Min length: \`${schema.minLength}\``;
+      if (
+        inputSchema.maximum !== undefined &&
+        !(
+          inputSchema.type === 'integer' &&
+          inputSchema.maximum === Number.MAX_SAFE_INTEGER
+        )
+      ) {
+        line += `  \n  Max value: \`${inputSchema.maximum}\``;
       }
-      if (schema.maxLength !== undefined) {
-        line += `  \n  Max length: \`${schema.maxLength}\``;
+      if (inputSchema.minLength !== undefined) {
+        line += `  \n  Min length: \`${inputSchema.minLength}\``;
       }
-      if (schema.default !== undefined) {
-        line += `  \n  Default: \`${schema.default}\``;
+      if (inputSchema.maxLength !== undefined) {
+        line += `  \n  Max length: \`${inputSchema.maxLength}\``;
+      }
+      if (inputSchema.default !== undefined) {
+        line += `  \n  Default: \`${inputSchema.default}\``;
       }
 
       lines.push(line, '');

@@ -43,5 +43,12 @@ exports[`generateMarkdown > generates complete markdown with all features 1`] = 
 - \`DB_HOST\` (required)  
   Type: \`string\`  
   Description: Database host address
+
+## Feature
+
+- \`FEATURE_ENABLED\` (optional)  
+  Type: \`boolean\`  
+  Description: Enable feature flag  
+  Default: \`false\`
 "
 `;
