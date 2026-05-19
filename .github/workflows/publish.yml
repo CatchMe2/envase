@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
 
       - name: Install
         run: pnpm install --frozen-lockfile
