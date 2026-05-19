@@ -57,9 +57,8 @@ export const generateMarkdown = async (
       // gaps for fields that only exist post-coercion (e.g. default on stringbool)
       const schema = { ...outputSchema, ...inputSchema };
 
-      const validationResult = await envvar.schema['~standard'].validate(
-        undefined,
-      );
+      const validationResult =
+        await envvar.schema['~standard'].validate(undefined);
       const isOptional = !validationResult.issues;
 
       let line = `- \`${envvar.envName}\` (${isOptional ? 'optional' : 'required'})`;
