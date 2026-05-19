@@ -3,9 +3,9 @@ import type { ExtractedEnvvar } from './extract-envvars.ts';
 /**
  * Generates markdown documentation from extracted environment variables.
  */
-export const generateMarkdown = (
+export const generateMarkdown = async (
   extractedEnvvars: ExtractedEnvvar[],
-): string => {
+): Promise<string> => {
   const lines: string[] = ['# Environment variables', ''];
 
   const envvarsByPath = new Map<string, ExtractedEnvvar[]>();
@@ -53,54 +53,59 @@ export const generateMarkdown = (
         ? mappedType.map((type) => `\`${type}\``).join(' | ')
         : `\`${mappedType}\``;
 
-      const validationResult = envvar.schema['~standard'].validate(undefined);
-      const isOptional = 'value' in validationResult;
+      // inputSchema takes precedence (describes accepted format); outputSchema fills
+      // gaps for fields that only exist post-coercion (e.g. default on stringbool)
+      const schema = { ...outputSchema, ...inputSchema };
+
+      const validationResult =
+        await envvar.schema['~standard'].validate(undefined);
+      const isOptional = !validationResult.issues;
 
       let line = `- \`${envvar.envName}\` (${isOptional ? 'optional' : 'required'})`;
 
       line += `  \n  Type: ${type}`;
 
-      if (inputSchema.description) {
-        line += `  \n  Description: ${inputSchema.description}`;
+      if (schema.description) {
+        line += `  \n  Description: ${schema.description}`;
       }
 
-      if (Array.isArray(inputSchema.enum)) {
-        const enumValues = inputSchema.enum.map((v) => `\`${v}\``).join(' | ');
+      if (Array.isArray(schema.enum)) {
+        const enumValues = schema.enum.map((v) => `\`${v}\``).join(' | ');
         line += `  \n  Supported values: ${enumValues}`;
       }
 
-      if (inputSchema.format) {
-        line += `  \n  Format: \`${inputSchema.format}\``;
+      if (schema.format) {
+        line += `  \n  Format: \`${schema.format}\``;
       }
-      if (inputSchema.pattern) {
-        line += `  \n  Pattern: \`${inputSchema.pattern}\``;
-      }
-      if (
-        inputSchema.minimum !== undefined &&
-        !(
-          inputSchema.type === 'integer' &&
-          inputSchema.minimum === Number.MIN_SAFE_INTEGER
-        )
-      ) {
-        line += `  \n  Min value: \`${inputSchema.minimum}\``;
+      if (schema.pattern) {
+        line += `  \n  Pattern: \`${schema.pattern}\``;
       }
       if (
-        inputSchema.maximum !== undefined &&
+        schema.minimum !== undefined &&
         !(
-          inputSchema.type === 'integer' &&
-          inputSchema.maximum === Number.MAX_SAFE_INTEGER
+          schema.type === 'integer' &&
+          schema.minimum === Number.MIN_SAFE_INTEGER
         )
       ) {
-        line += `  \n  Max value: \`${inputSchema.maximum}\``;
+        line += `  \n  Min value: \`${schema.minimum}\``;
       }
-      if (inputSchema.minLength !== undefined) {
-        line += `  \n  Min length: \`${inputSchema.minLength}\``;
+      if (
+        schema.maximum !== undefined &&
+        !(
+          schema.type === 'integer' &&
+          schema.maximum === Number.MAX_SAFE_INTEGER
+        )
+      ) {
+        line += `  \n  Max value: \`${schema.maximum}\``;
       }
-      if (inputSchema.maxLength !== undefined) {
-        line += `  \n  Max length: \`${inputSchema.maxLength}\``;
+      if (schema.minLength !== undefined) {
+        line += `  \n  Min length: \`${schema.minLength}\``;
       }
-      if (inputSchema.default !== undefined) {
-        line += `  \n  Default: \`${inputSchema.default}\``;
+      if (schema.maxLength !== undefined) {
+        line += `  \n  Max length: \`${schema.maxLength}\``;
+      }
+      if (schema.default !== undefined) {
+        line += `  \n  Default: \`${schema.default}\``;
       }
 
       lines.push(line, '');
