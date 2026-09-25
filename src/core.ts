@@ -52,6 +52,18 @@ export const parseEnv = <T extends EnvSchema>(
             );
           }
 
+          // Number coercion turns an empty string into 0 (e.g. `Number('')`),
+          // which would silently pass validation. Report it as an issue instead.
+          if (envvarValue === '' && !result.issues && result.value === 0) {
+            envvarValidationIssues.push({
+              name: envvarName,
+              value: envvarValue,
+              messages: ['Empty string cannot be coerced to a number'],
+            });
+
+            return [key, null];
+          }
+
           if (result.issues) {
             envvarValidationIssues.push({
               name: envvarName,

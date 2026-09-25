@@ -116,6 +116,24 @@ try {
 }
 ```
 
+### Empty Values
+
+An empty envvar (e.g. `PORT=`) is passed to the schema as an empty string, not as `undefined`. This means `.default()` and `.optional()` don't apply to it.
+
+Number coercion would silently turn an empty string into `0` (`Number('') === 0`). To prevent that, Envase reports a validation error whenever an empty string is coerced to `0`:
+
+```typescript
+parseEnv({ PORT: '' }, {
+  port: envvar('PORT', z.coerce.number().default(3000)),
+});
+// Environment variables validation has failed:
+//   [PORT]:
+//     Empty string cannot be coerced to a number
+//     (received: "")
+```
+
+To use the default, leave the envvar unset instead of setting it to an empty value.
+
 ### Type Inference
 
 ```typescript

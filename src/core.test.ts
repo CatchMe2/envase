@@ -103,6 +103,33 @@ describe('core', () => {
         expect(config.withDefault).toBe('');
       });
 
+      it.each([
+        ['required', z.coerce.number()],
+        ['optional', z.coerce.number().optional()],
+        ['with default', z.coerce.number().default(3000)],
+      ])('throws when empty string is coerced to 0 (%s)', (_, schema) => {
+        expect(() =>
+          parseEnv(mockEnv, {
+            port: envvar('EMPTY', schema),
+          }),
+        ).toThrowErrorMatchingInlineSnapshot(`
+          [EnvaseError: Environment variables validation has failed:
+            [EMPTY]:
+              Empty string cannot be coerced to a number
+              (received: "")
+          ]
+        `);
+      });
+
+      it('keeps explicit 0', () => {
+        const config = parseEnv(
+          { PORT: '0' },
+          { port: envvar('PORT', z.coerce.number().default(3000)) },
+        );
+
+        expect(config.port).toBe(0);
+      });
+
       it('throws for async validation', () => {
         expect(() =>
           parseEnv(mockEnv, {
