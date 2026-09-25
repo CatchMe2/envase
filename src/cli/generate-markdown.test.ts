@@ -29,6 +29,7 @@ describe('generateMarkdown', () => {
           .min(32)
           .max(255)
           .describe('Your API key for authentication'),
+        sensitive: true,
       },
       {
         envName: 'RATIO',

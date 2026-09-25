@@ -61,7 +61,13 @@ export const generateMarkdown = async (
         await envvar.schema['~standard'].validate(undefined);
       const isOptional = !validationResult.issues;
 
-      let line = `- \`${envvar.envName}\` (${isOptional ? 'optional' : 'required'})`;
+      const flags = [isOptional ? 'optional' : 'required'];
+
+      if (envvar.sensitive) {
+        flags.push('sensitive');
+      }
+
+      let line = `- \`${envvar.envName}\` (${flags.join(', ')})`;
 
       line += `  \n  Type: ${type}`;
 
