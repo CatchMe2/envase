@@ -2,4 +2,4 @@
 "envase": patch
 ---
 
-Treat an empty envvar that a schema coerces to `0` (e.g. `z.coerce.number()` with `PORT=`) as missing, so `.default()` and `.optional()` apply and required envvars fail validation instead of silently resolving to `0`.
+Report a validation error when an empty envvar is coerced to `0` (e.g. `z.coerce.number()` with `PORT=`), instead of silently resolving it to `0`.

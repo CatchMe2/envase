@@ -27,25 +27,6 @@ export const envvar = <T extends StandardSchemaV1>(
   schema: T,
 ): EnvvarEntry<T> => [name, schema];
 
-const validateSync = (
-  envvarName: string,
-  schema: StandardSchemaV1,
-  value: unknown,
-): StandardSchemaV1.Result<unknown> => {
-  const result = schema['~standard'].validate(value);
-
-  if (
-    result instanceof Promise ||
-    ('then' in result && typeof result.then === 'function')
-  ) {
-    throw new Error(
-      `Schema validation for envvar "${envvarName}" must be synchronous`,
-    );
-  }
-
-  return result;
-};
-
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
   envSchema: T,
@@ -60,13 +41,27 @@ export const parseEnv = <T extends EnvSchema>(
           const [envvarName, schema] = value;
           const envvarValue = env[envvarName];
 
-          let result = validateSync(envvarName, schema, envvarValue);
+          const result = schema['~standard'].validate(envvarValue);
+
+          if (
+            result instanceof Promise ||
+            ('then' in result && typeof result.then === 'function')
+          ) {
+            throw new Error(
+              `Schema validation for envvar "${envvarName}" must be synchronous`,
+            );
+          }
 
           // Number coercion turns an empty string into 0 (e.g. `Number('')`),
-          // which silently bypasses defaults and required checks. Treat such
-          // envvars as missing instead.
+          // which would silently pass validation. Report it as an issue instead.
           if (envvarValue === '' && !result.issues && result.value === 0) {
-            result = validateSync(envvarName, schema, undefined);
+            envvarValidationIssues.push({
+              name: envvarName,
+              value: envvarValue,
+              messages: ['Empty string cannot be coerced to a number'],
+            });
+
+            return [key, null];
           }
 
           if (result.issues) {

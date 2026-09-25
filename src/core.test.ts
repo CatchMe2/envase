@@ -103,31 +103,19 @@ describe('core', () => {
         expect(config.withDefault).toBe('');
       });
 
-      it('applies default when empty string is coerced to 0', () => {
-        const config = parseEnv(mockEnv, {
-          port: envvar('EMPTY', z.coerce.number().default(3000)),
-        });
-
-        expect(config.port).toBe(3000);
-      });
-
-      it('returns undefined for optional value when empty string is coerced to 0', () => {
-        const config = parseEnv(mockEnv, {
-          port: envvar('EMPTY', z.coerce.number().optional()),
-        });
-
-        expect(config.port).toBeUndefined();
-      });
-
-      it('throws when empty string is coerced to 0 for required value', () => {
+      it.each([
+        ['required', z.coerce.number()],
+        ['optional', z.coerce.number().optional()],
+        ['with default', z.coerce.number().default(3000)],
+      ])('throws when empty string is coerced to 0 (%s)', (_, schema) => {
         expect(() =>
           parseEnv(mockEnv, {
-            port: envvar('EMPTY', z.coerce.number()),
+            port: envvar('EMPTY', schema),
           }),
         ).toThrowErrorMatchingInlineSnapshot(`
           [EnvaseError: Environment variables validation has failed:
             [EMPTY]:
-              Invalid input: expected number, received NaN
+              Empty string cannot be coerced to a number
               (received: "")
           ]
         `);
