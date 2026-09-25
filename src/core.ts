@@ -4,6 +4,7 @@ import type {
   ComputedSchema,
   EnvSchema,
   EnvvarEntry,
+  EnvvarOptions,
   EnvvarValidationIssue,
   InferConfig,
   InferEnv,
@@ -25,7 +26,10 @@ export const detectNodeEnv = (
 export const envvar = <T extends StandardSchemaV1>(
   name: string,
   schema: T,
-): EnvvarEntry<T> => [name, schema];
+  options?: EnvvarOptions,
+): EnvvarEntry<T> => (options ? [name, schema, options] : [name, schema]);
+
+const REDACTED = '[REDACTED]';
 
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
@@ -38,7 +42,7 @@ export const parseEnv = <T extends EnvSchema>(
     return Object.fromEntries(
       Object.entries(schema).map(([key, value]) => {
         if (Array.isArray(value)) {
-          const [envvarName, schema] = value;
+          const [envvarName, schema, options] = value;
           const envvarValue = env[envvarName];
 
           const result = schema['~standard'].validate(envvarValue);
@@ -53,11 +57,25 @@ export const parseEnv = <T extends EnvSchema>(
           }
 
           if (result.issues) {
-            envvarValidationIssues.push({
-              name: envvarName,
-              value: envvarValue,
-              messages: result.issues.map(({ message }) => message),
-            });
+            const messages = result.issues.map(({ message }) => message);
+
+            // Empty or missing values reveal nothing, so they're kept to ease debugging
+            if (options?.sensitive && envvarValue) {
+              envvarValidationIssues.push({
+                name: envvarName,
+                redacted: true,
+                // Some schema libraries include the received value in messages
+                messages: messages.map((message) =>
+                  message.replaceAll(envvarValue, REDACTED),
+                ),
+              });
+            } else {
+              envvarValidationIssues.push({
+                name: envvarName,
+                value: envvarValue,
+                messages,
+              });
+            }
 
             return [key, null];
           }
