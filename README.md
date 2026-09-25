@@ -414,3 +414,5 @@ Contains:
 
 Contributions are welcome!
 If you’d like to improve this package, feel free to open an issue or submit a pull request. 🚀
+
+If your change should be released, run `pnpm changeset` and commit the generated changeset file along with your code.
