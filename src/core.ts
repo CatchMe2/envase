@@ -60,9 +60,9 @@ export const parseEnv = <T extends EnvSchema>(
           // `Number('  ')`), which would silently pass validation. Report it as
           // an issue instead.
           if (
-            envvarValue?.trim() === '' &&
             !result.issues &&
-            result.value === 0
+            result.value === 0 &&
+            envvarValue?.trim() === ''
           ) {
             envvarValidationIssues.push({
               name: envvarName,
