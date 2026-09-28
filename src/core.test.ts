@@ -375,6 +375,16 @@ describe('core', () => {
         expect(config).toEqual({ domain: 'localhost', port: 3000 });
       });
 
+      it('applies default of 0 for empty value', () => {
+        const config = parseEnv(
+          { PORT: '' },
+          { port: envvar('PORT', z.coerce.number().default(0)) },
+          options,
+        );
+
+        expect(config.port).toBe(0);
+      });
+
       it('returns undefined for optional empty value', () => {
         const config = parseEnv(
           { DOMAIN: '' },

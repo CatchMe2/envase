@@ -47,11 +47,12 @@ export const parseEnv = <T extends EnvSchema>(
           const [envvarName, schema, options] = value;
           const envvarValue = env[envvarName];
 
-          const result = schema['~standard'].validate(
+          const input =
             emptyStringAsUndefined && envvarValue === ''
               ? undefined
-              : envvarValue,
-          );
+              : envvarValue;
+
+          const result = schema['~standard'].validate(input);
 
           if (
             result instanceof Promise ||
@@ -64,12 +65,9 @@ export const parseEnv = <T extends EnvSchema>(
 
           // Number coercion turns a blank string into 0 (e.g. `Number('')` or
           // `Number('  ')`), which would silently pass validation. Report it as
-          // an issue instead.
-          if (
-            !result.issues &&
-            result.value === 0 &&
-            envvarValue?.trim() === ''
-          ) {
+          // an issue instead. Checks the schema input, since a default of 0 is
+          // legitimate when an empty envvar is treated as undefined.
+          if (!result.issues && result.value === 0 && input?.trim() === '') {
             envvarValidationIssues.push({
               name: envvarName,
               value: envvarValue,
