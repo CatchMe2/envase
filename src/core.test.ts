@@ -112,27 +112,44 @@ describe('core', () => {
         expect(config.withDefault).toBe('');
       });
 
-      it.each([
-        ['required', z.coerce.number()],
-        ['optional', z.coerce.number().optional()],
-        ['with default', z.coerce.number().default(3000)],
-      ])('throws when empty string is coerced to 0 (%s)', (_, schema) => {
+      it('throws when blank value is coerced to 0', () => {
         expect(() =>
           parseEnv(mockEnv, {
-            port: envvar('EMPTY', schema),
+            port: envvar('EMPTY', z.coerce.number()),
           }),
         ).toThrowErrorMatchingInlineSnapshot(`
           [EnvaseError: Environment variables validation has failed:
             [EMPTY]:
-              Empty string cannot be coerced to a number
+              Blank value cannot be coerced to a number
               (received: "")
           ]
         `);
       });
 
-      it('keeps explicit 0', () => {
+      it.each([
+        ['required', z.coerce.number()],
+        ['optional', z.coerce.number().optional()],
+        ['with default', z.coerce.number().default(3000)],
+      ])('throws when blank value is coerced to 0 (%s)', (_, schema) => {
+        for (const value of ['', '  ', '\t\n']) {
+          expect(() =>
+            parseEnv({ PORT: value }, { port: envvar('PORT', schema) }),
+          ).toThrowError('Blank value cannot be coerced to a number');
+        }
+      });
+
+      it('passes whitespace-only value to the schema unchanged', () => {
         const config = parseEnv(
-          { PORT: '0' },
+          { SEPARATOR: '  ' },
+          { separator: envvar('SEPARATOR', z.string()) },
+        );
+
+        expect(config.separator).toBe('  ');
+      });
+
+      it.each(['0', '0.0', ' 0 '])('keeps explicit 0 (%j)', (value) => {
+        const config = parseEnv(
+          { PORT: value },
           { port: envvar('PORT', z.coerce.number().default(3000)) },
         );
 
