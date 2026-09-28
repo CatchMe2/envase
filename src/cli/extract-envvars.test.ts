@@ -21,6 +21,18 @@ describe('extractEnvvars', () => {
     ]);
   });
 
+  it('extracts sensitive flag', () => {
+    const apiKeySchema = z.string();
+
+    const result = extractEnvvars({
+      apiKey: envvar('API_KEY', apiKeySchema, { sensitive: true }),
+    });
+
+    expect(result).toEqual([
+      { envName: 'API_KEY', path: [], schema: apiKeySchema, sensitive: true },
+    ]);
+  });
+
   it('extracts nested environment variables', () => {
     const hostSchema = z.string();
     const portSchema = z.number();

@@ -7,7 +7,16 @@ export type NodeEnvInfo = {
   isDevelopment: boolean;
 };
 
-export type EnvvarEntry<T extends StandardSchemaV1> = [string, T];
+export type EnvvarOptions = {
+  /** Redacts the received value from validation errors */
+  sensitive?: boolean;
+};
+
+export type EnvvarEntry<T extends StandardSchemaV1> = [
+  name: string,
+  schema: T,
+  options?: EnvvarOptions,
+];
 
 export type EnvSchema = {
   [key: string]: EnvSchema | EnvvarEntry<StandardSchemaV1>;
@@ -26,6 +35,8 @@ export type InferEnv<T extends EnvSchema> = SimplifyDeep<RecursiveInferEnv<T>>;
 export type EnvvarValidationIssue = {
   name: string;
   value?: string;
+  /** Set when the received value was omitted because the envvar is sensitive */
+  redacted?: boolean;
   messages: string[];
 };
 

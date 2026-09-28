@@ -11,6 +11,8 @@ export interface ExtractedEnvvar {
   path: string[];
   /** Standard Schema instance */
   schema: StandardSchemaV1 & StandardJSONSchemaV1;
+  /** Whether the envvar is marked as sensitive */
+  sensitive?: boolean;
 }
 
 const isStandardJsonSchema = (
@@ -38,7 +40,7 @@ export const extractEnvvars = (
 
   for (const [key, value] of Object.entries(schema)) {
     if (Array.isArray(value)) {
-      const [envName, standardSchema] = value;
+      const [envName, standardSchema, options] = value;
 
       if (!isStandardJsonSchema(standardSchema)) {
         const combinedPath = [...path, key].join('.');
@@ -51,6 +53,7 @@ export const extractEnvvars = (
         envName,
         path,
         schema: standardSchema,
+        sensitive: options?.sensitive,
       });
     } else {
       extractedEnvvars.push(...extractEnvvars(value, [...path, key]));

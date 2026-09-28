@@ -8,8 +8,8 @@ export class EnvaseError extends Error {
   constructor(envvarValidationIssues: EnvvarValidationIssue[]) {
     const parsedIssues = envvarValidationIssues
       .map(
-        ({ name, value, messages }) =>
-          `  [${name}]:\n    ${messages.join('\n    ')}\n    (received: "${value}")`,
+        ({ name, value, redacted, messages }) =>
+          `  [${name}]:\n    ${messages.join('\n    ')}\n    (received: ${redacted ? '[REDACTED]' : `"${value}"`})`,
       )
       .join('\n\n');
 

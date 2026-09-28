@@ -14,6 +14,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 - 🧮 **Computed values** - Derive values from parsed config with full type inference
 - 🚦 **Environment detection** - `isProduction`, `isTest`, `isDevelopment` flags
 - 📜 **Detailed error reporting** - See all validation failures at once
+- 🙈 **Sensitive values** - Keep secrets out of validation errors
 - 🚀 **Lightweight** - Single dependency (type-fest), zero runtime overhead
 
 ## Installation
@@ -115,6 +116,28 @@ try {
   }
 }
 ```
+
+### Sensitive Values
+
+Mark envvars holding secrets as sensitive to keep their values out of validation errors:
+
+```typescript
+parseEnv({ API_KEY: 'short' }, {
+  apiKey: envvar('API_KEY', z.string().min(32), { sensitive: true }),
+});
+// Environment variables validation has failed:
+//   [API_KEY]:
+//     Too small: expected string to have >=32 characters
+//     (received: [REDACTED])
+```
+
+When validation of a sensitive envvar fails:
+- the received value is replaced with `[REDACTED]` in the error message,
+- the issue in `error.issues` has no `value` and is flagged with `redacted: true`,
+- any occurrence of the value in messages returned by the schema library is replaced with `[REDACTED]`.
+
+Missing and empty values are not redacted, as they don't reveal anything.
+Sensitive envvars are also marked as such in the [generated documentation](#cli).
 
 ### Type Inference
 
@@ -362,10 +385,12 @@ This command is useful for:
 
 ### `envvar`
 
-`envvar(name: string, schema: StandardSchemaV1<T>)`
+`envvar(name: string, schema: StandardSchemaV1<T>, options?: EnvvarOptions)`
 
 Wraps a variable name and its schema for validation.
 This helps pair the raw env name with the shape you expect it to conform to.
+
+- `options.sensitive` - Redacts the received value from validation errors (see [Sensitive Values](#sensitive-values))
 
 ### `parseEnv`
 
@@ -401,7 +426,8 @@ Contains:
 - `message`: Human-readable error summary
 - `issues`: Array of validation issues with:
   - `name`: Environment variable name
-  - `value`: Invalid value received
+  - `value`: Invalid value received (omitted for redacted values)
+  - `redacted`: `true` if the value was omitted because the envvar is sensitive
   - `messages`: Validation error messages
 
 ## Why Envase?

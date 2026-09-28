@@ -3,7 +3,7 @@
 exports[`generateMarkdown > generates complete markdown with all features 1`] = `
 "# Environment variables
 
-- \`API_KEY\` (required)  
+- \`API_KEY\` (required, sensitive)  
   Type: \`string\`  
   Description: Your API key for authentication  
   Min length: \`32\`  

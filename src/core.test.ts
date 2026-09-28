@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { z } from 'zod';
 import { createConfig, detectNodeEnv, envvar, parseEnv } from './core.ts';
+import { EnvaseError } from './errors/envase-error.ts';
 
 describe('core', () => {
   describe('detectNodeEnv', () => {
@@ -46,6 +47,14 @@ describe('core', () => {
       const entry = envvar(envvarName, schema);
 
       expect(entry).toEqual([envvarName, schema]);
+    });
+
+    it('includes options in the tuple when provided', () => {
+      const schema = z.string();
+
+      const entry = envvar('API_KEY', schema, { sensitive: true });
+
+      expect(entry).toEqual(['API_KEY', schema, { sensitive: true }]);
     });
   });
 
@@ -214,6 +223,95 @@ describe('core', () => {
             (received: "undefined")
         ]
       `);
+      });
+
+      it('redacts sensitive values from messages returned by Valibot', () => {
+        expect(() =>
+          parseEnv(mockEnv, {
+            apiKey: envvar('API_KEY', v.picklist(['a', 'b']), {
+              sensitive: true,
+            }),
+          }),
+        ).toThrowErrorMatchingInlineSnapshot(`
+          [EnvaseError: Environment variables validation has failed:
+            [API_KEY]:
+              Invalid type: Expected ("a" | "b") but received "[REDACTED]"
+              (received: [REDACTED])
+          ]
+        `);
+      });
+    });
+
+    describe('sensitive envvars', () => {
+      const getIssues = (fn: () => unknown) => {
+        try {
+          fn();
+        } catch (error) {
+          if (EnvaseError.isInstance(error)) {
+            return error.issues;
+          }
+        }
+        throw new Error('Expected EnvaseError to be thrown');
+      };
+
+      it('redacts received value when validation fails', () => {
+        const parse = () =>
+          parseEnv(mockEnv, {
+            apiKey: envvar('API_KEY', z.string().min(20), { sensitive: true }),
+          });
+
+        expect(parse).toThrowErrorMatchingInlineSnapshot(`
+          [EnvaseError: Environment variables validation has failed:
+            [API_KEY]:
+              Too small: expected string to have >=20 characters
+              (received: [REDACTED])
+          ]
+        `);
+        expect(getIssues(parse)).toEqual([
+          {
+            name: 'API_KEY',
+            redacted: true,
+            messages: ['Too small: expected string to have >=20 characters'],
+          },
+        ]);
+      });
+
+      it('keeps missing value visible', () => {
+        const parse = () =>
+          parseEnv(mockEnv, {
+            apiKey: envvar('MISSING', z.string(), { sensitive: true }),
+          });
+
+        expect(getIssues(parse)).toEqual([
+          {
+            name: 'MISSING',
+            value: undefined,
+            messages: ['Invalid input: expected string, received undefined'],
+          },
+        ]);
+      });
+
+      it('keeps empty value visible', () => {
+        const parse = () =>
+          parseEnv(mockEnv, {
+            apiKey: envvar('EMPTY', z.string().min(1), { sensitive: true }),
+          });
+
+        expect(getIssues(parse)).toEqual([
+          {
+            name: 'EMPTY',
+            value: '',
+            messages: ['Too small: expected string to have >=1 characters'],
+          },
+        ]);
+      });
+
+      it('returns sensitive value when validation passes', () => {
+        const config = parseEnv(mockEnv, {
+          apiKey: envvar('API_KEY', z.string(), { sensitive: true }),
+        });
+
+        expect(config.apiKey).toBe(mockEnv.API_KEY);
       });
     });
   });

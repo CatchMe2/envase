@@ -33,6 +33,20 @@ describe('EnvaseError', () => {
     `);
   });
 
+  it('redacts received value of redacted issues', () => {
+    const error = new EnvaseError([
+      { name: 'API_KEY', redacted: true, messages: ['Too short'] },
+    ]);
+
+    expect(error).toMatchInlineSnapshot(`
+      [EnvaseError: Environment variables validation has failed:
+        [API_KEY]:
+          Too short
+          (received: [REDACTED])
+      ]
+    `);
+  });
+
   it('sets the correct error name', () => {
     const error = new EnvaseError([]);
     expect(error.name).toBe('EnvaseError');
