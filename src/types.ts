@@ -12,6 +12,14 @@ export type EnvvarOptions = {
   sensitive?: boolean;
 };
 
+export type ParseEnvOptions = {
+  /**
+   * Treats empty envvars (e.g. `PORT=`) as missing, so that `.default()` and
+   * `.optional()` apply to them
+   */
+  emptyStringAsUndefined?: boolean;
+};
+
 export type EnvvarEntry<T extends StandardSchemaV1> = [
   name: string,
   schema: T,

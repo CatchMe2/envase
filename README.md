@@ -133,7 +133,17 @@ parseEnv({ PORT: '' }, {
 //     (received: "")
 ```
 
-To use the default, leave the envvar unset instead of setting it to an empty value.
+To use the default, leave the envvar unset, or enable the `emptyStringAsUndefined` option to treat empty envvars as missing:
+
+```typescript
+parseEnv({ PORT: '', DOMAIN: '' }, {
+  port: envvar('PORT', z.coerce.number().default(3000)),
+  domain: envvar('DOMAIN', z.string().default('localhost')),
+}, { emptyStringAsUndefined: true });
+// { port: 3000, domain: 'localhost' }
+```
+
+With this option, `.default()` and `.optional()` apply to empty envvars, and required ones fail validation. Whitespace-only values are still passed to the schema unchanged. We recommend enabling it in new projects.
 
 ### Sensitive Values
 
@@ -412,9 +422,11 @@ This helps pair the raw env name with the shape you expect it to conform to.
 
 ### `parseEnv`
 
-`parseEnv(env: Record<string, string | undefined>, envSchema: T)`
+`parseEnv(env: Record<string, string | undefined>, envSchema: T, options?: ParseEnvOptions)`
 
 Validates envvars against the schema and returns a typed configuration object.
+
+- `options.emptyStringAsUndefined` - Treats empty envvars as missing (see [Empty Values](#empty-values))
 
 ### `createConfig`
 
@@ -425,6 +437,7 @@ Validates envvars and optionally computes derived values. Returns a merged objec
 - `env` - Environment variables object (e.g., `process.env`)
 - `options.schema` - Environment variable schema (same format as `parseEnv`)
 - `options.computed` - Optional object where each key is a function receiving the parsed config and returning a derived value
+- `options.emptyStringAsUndefined` - Same as in `parseEnv`
 
 ### `detectNodeEnv`
 
