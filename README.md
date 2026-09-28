@@ -15,7 +15,7 @@ Works with Zod, Valibot, ArkType, and other Standard Schema-compatible validatio
 - 🚦 **Environment detection** - `isProduction`, `isTest`, `isDevelopment` flags
 - 📜 **Detailed error reporting** - See all validation failures at once
 - 🙈 **Sensitive values** - Keep secrets out of validation errors
-- 🚀 **Lightweight** - Single dependency (type-fest), zero runtime overhead
+- 🚀 **Lightweight** - No runtime dependencies (CLI-only deps aside)
 
 ## Installation
 
