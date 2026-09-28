@@ -112,6 +112,50 @@ describe('core', () => {
         expect(config.withDefault).toBe('');
       });
 
+      it('throws when blank value is coerced to 0', () => {
+        expect(() =>
+          parseEnv(mockEnv, {
+            port: envvar('EMPTY', z.coerce.number()),
+          }),
+        ).toThrowErrorMatchingInlineSnapshot(`
+          [EnvaseError: Environment variables validation has failed:
+            [EMPTY]:
+              Blank value cannot be coerced to a number
+              (received: "")
+          ]
+        `);
+      });
+
+      it.each([
+        ['required', z.coerce.number()],
+        ['optional', z.coerce.number().optional()],
+        ['with default', z.coerce.number().default(3000)],
+      ])('throws when blank value is coerced to 0 (%s)', (_, schema) => {
+        for (const value of ['', '  ', '\t\n']) {
+          expect(() =>
+            parseEnv({ PORT: value }, { port: envvar('PORT', schema) }),
+          ).toThrowError('Blank value cannot be coerced to a number');
+        }
+      });
+
+      it('passes whitespace-only value to the schema unchanged', () => {
+        const config = parseEnv(
+          { SEPARATOR: '  ' },
+          { separator: envvar('SEPARATOR', z.string()) },
+        );
+
+        expect(config.separator).toBe('  ');
+      });
+
+      it.each(['0', '0.0', ' 0 '])('keeps explicit 0 (%j)', (value) => {
+        const config = parseEnv(
+          { PORT: value },
+          { port: envvar('PORT', z.coerce.number().default(3000)) },
+        );
+
+        expect(config.port).toBe(0);
+      });
+
       it('throws for async validation', () => {
         expect(() =>
           parseEnv(mockEnv, {
@@ -314,6 +358,79 @@ describe('core', () => {
         expect(config.apiKey).toBe(mockEnv.API_KEY);
       });
     });
+
+    describe('emptyStringAsUndefined', () => {
+      const options = { emptyStringAsUndefined: true };
+
+      it('applies default for empty value', () => {
+        const config = parseEnv(
+          { DOMAIN: '', PORT: '' },
+          {
+            domain: envvar('DOMAIN', z.string().default('localhost')),
+            port: envvar('PORT', z.coerce.number().default(3000)),
+          },
+          options,
+        );
+
+        expect(config).toEqual({ domain: 'localhost', port: 3000 });
+      });
+
+      it('applies default of 0 for empty value', () => {
+        const config = parseEnv(
+          { PORT: '' },
+          { port: envvar('PORT', z.coerce.number().default(0)) },
+          options,
+        );
+
+        expect(config.port).toBe(0);
+      });
+
+      it('returns undefined for optional empty value', () => {
+        const config = parseEnv(
+          { DOMAIN: '' },
+          { domain: envvar('DOMAIN', z.string().optional()) },
+          options,
+        );
+
+        expect(config.domain).toBeUndefined();
+      });
+
+      it('throws for required empty value', () => {
+        expect(() =>
+          parseEnv(
+            { DOMAIN: '' },
+            { domain: envvar('DOMAIN', z.string()) },
+            options,
+          ),
+        ).toThrowErrorMatchingInlineSnapshot(`
+          [EnvaseError: Environment variables validation has failed:
+            [DOMAIN]:
+              Invalid input: expected string, received undefined
+              (received: "")
+          ]
+        `);
+      });
+
+      it('passes whitespace-only value to the schema unchanged', () => {
+        const config = parseEnv(
+          { SEPARATOR: '  ' },
+          { separator: envvar('SEPARATOR', z.string().default(',')) },
+          options,
+        );
+
+        expect(config.separator).toBe('  ');
+      });
+
+      it('still throws when whitespace-only value is coerced to 0', () => {
+        expect(() =>
+          parseEnv(
+            { PORT: '  ' },
+            { port: envvar('PORT', z.coerce.number().default(3000)) },
+            options,
+          ),
+        ).toThrowError('Blank value cannot be coerced to a number');
+      });
+    });
   });
 
   describe('createConfig', () => {
@@ -323,6 +440,22 @@ describe('core', () => {
       DB_NAME: 'mydb',
       API_KEY: 'secret123',
     };
+
+    it('treats empty values as missing with emptyStringAsUndefined', () => {
+      const config = createConfig(
+        { DB_HOST: '' },
+        {
+          schema: {
+            db: {
+              host: envvar('DB_HOST', z.string().default('localhost')),
+            },
+          },
+          emptyStringAsUndefined: true,
+        },
+      );
+
+      expect(config.db.host).toBe('localhost');
+    });
 
     it('parses config without computed values', () => {
       const config = createConfig(mockEnv, {

@@ -6,4 +6,5 @@ export type {
   InferComputed,
   InferConfig,
   InferEnv,
+  ParseEnvOptions,
 } from './types.ts';

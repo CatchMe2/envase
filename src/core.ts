@@ -9,6 +9,7 @@ import type {
   InferConfig,
   InferEnv,
   NodeEnvInfo,
+  ParseEnvOptions,
 } from './types.ts';
 
 export const detectNodeEnv = (
@@ -34,6 +35,7 @@ const REDACTED = '[REDACTED]';
 export const parseEnv = <T extends EnvSchema>(
   env: Record<string, string | undefined>,
   envSchema: T,
+  { emptyStringAsUndefined = false }: ParseEnvOptions = {},
 ): InferEnv<T> => {
   const envvarValidationIssues: EnvvarValidationIssue[] = [];
 
@@ -45,7 +47,12 @@ export const parseEnv = <T extends EnvSchema>(
           const [envvarName, schema, options] = value;
           const envvarValue = env[envvarName];
 
-          const result = schema['~standard'].validate(envvarValue);
+          const input =
+            emptyStringAsUndefined && envvarValue === ''
+              ? undefined
+              : envvarValue;
+
+          const result = schema['~standard'].validate(input);
 
           if (
             result instanceof Promise ||
@@ -54,6 +61,20 @@ export const parseEnv = <T extends EnvSchema>(
             throw new Error(
               `Schema validation for envvar "${envvarName}" must be synchronous`,
             );
+          }
+
+          // Number coercion turns a blank string into 0 (e.g. `Number('')` or
+          // `Number('  ')`), which would silently pass validation. Report it as
+          // an issue instead. Checks the schema input, since a default of 0 is
+          // legitimate when an empty envvar is treated as undefined.
+          if (!result.issues && result.value === 0 && input?.trim() === '') {
+            envvarValidationIssues.push({
+              name: envvarName,
+              value: envvarValue,
+              messages: ['Blank value cannot be coerced to a number'],
+            });
+
+            return [key, null];
           }
 
           if (result.issues) {
@@ -150,7 +171,7 @@ const deepMerge = (
 // Overload: without computed
 export function createConfig<TSchema extends EnvSchema>(
   env: Record<string, string | undefined>,
-  options: {
+  options: ParseEnvOptions & {
     schema: TSchema;
     computed?: undefined;
   },
@@ -162,7 +183,7 @@ export function createConfig<
   const TComputed extends ComputedSchema<InferEnv<TSchema>>,
 >(
   env: Record<string, string | undefined>,
-  options: {
+  options: ParseEnvOptions & {
     schema: TSchema;
     computed: TComputed;
   },
@@ -174,14 +195,16 @@ export function createConfig<
   TComputed extends ComputedSchema<InferEnv<TSchema>>,
 >(
   env: Record<string, string | undefined>,
-  options: {
+  options: ParseEnvOptions & {
     schema: TSchema;
     computed?: TComputed;
   },
   // biome-ignore lint/suspicious/noExplicitAny: Required for overload implementation
 ): any {
   // Parse raw config using existing parseEnv
-  const rawConfig = parseEnv(env, options.schema);
+  const rawConfig = parseEnv(env, options.schema, {
+    emptyStringAsUndefined: options.emptyStringAsUndefined,
+  });
 
   // If no computed values, return raw config
   if (!options.computed) {
