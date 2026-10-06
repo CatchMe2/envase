@@ -1,5 +1,15 @@
 # envase
 
+## 2.1.0
+
+### Minor Changes
+
+- 3667296: Export the `EnvvarEntry` type so schemas built with `envvar` can be named in declaration emit, and the `EnvSchema` type so generic helpers can constrain a schema parameter the way `parseEnv` and `createConfig` do.
+
+### Patch Changes
+
+- 0adef22: Bump `type-fest` to ^5.10.0
+
 ## 2.0.0
 
 ### Major Changes

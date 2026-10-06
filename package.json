@@ -1,6 +1,6 @@
 {
   "name": "envase",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "packageManager": "pnpm@11.1.0",
   "author": "Mateusz Tkacz",
